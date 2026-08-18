@@ -1,0 +1,6 @@
+Firing 50 sequential requests at each endpoint...
+
+bad  (new engine+client per request): mean=17.48ms p50=16.82ms p95=19.52ms (n=50)
+good (shared singletons)             : mean=1.73ms p50=1.59ms p95=2.56ms (n=50)
+
+mean overhead: 15.74ms per request

@@ -1,0 +1,16 @@
+Captured against the dockerized app (docker compose up -d), 3 concurrent
+requests to each endpoint, wall-clock via `time`:
+
+=== BAD (requests.get() inside async def) ===
+real: 3.046s total   (~1s x 3, fully serialized — the event loop is blocked
+                       for the duration of each synchronous call)
+
+=== GOOD (httpx.AsyncClient) ===
+real: 1.040s total   (~1s total — all 3 requests run concurrently)
+
+=== BRIDGE (run_in_executor) ===
+real: 1.039s total   (~1s total — also concurrent; a valid migration step
+                       when you can't rewrite the sync call immediately)
+
+Command used:
+  time (for i in 1 2 3; do curl -s -o /dev/null http://localhost:8000/demo/ap1/<mode> & done; wait)

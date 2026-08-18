@@ -1,0 +1,11 @@
+app-1  |           ^^^^^^^^^^^^^^
+app-1  |   File "/srv/.venv/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 167, in _do_get
+app-1  |     raise exc.TimeoutError(
+app-1  | sqlalchemy.exc.TimeoutError: QueuePool limit of size 5 overflow 10 reached, connection timed out, timeout 2.00 (Background on this error at: https://sqlalche.me/e/20/3o7r)
+--
+app-1  |   File "/srv/.venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 712, in checkout
+app-1  |     rec = pool._do_get()
+app-1  |           ^^^^^^^^^^^^^^
+app-1  |   File "/srv/.venv/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 167, in _do_get
+app-1  |     raise exc.TimeoutError(
+app-1  | sqlalchemy.exc.TimeoutError: QueuePool limit of size 5 overflow 10 reached, connection timed out, timeout 2.00 (Background on this error at: https://sqlalche.me/e/20/3o7r)

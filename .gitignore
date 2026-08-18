@@ -1,0 +1,14 @@
+/docs/superpowers
+/mail.txt
+/pycon_hk_2026_fastapi_proposal.md
+.DS_Store
+**/*.pyc
+
+.venv/
+__pycache__
+*.pyc
+.env
+uv.lock.bak
+benchmarks/*/*.raw
+.pytest_cache/
+*.egg-info/

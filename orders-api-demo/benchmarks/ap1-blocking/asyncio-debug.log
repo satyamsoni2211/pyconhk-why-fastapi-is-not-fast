@@ -1,0 +1,4 @@
+WARNING:asyncio:Executing <Task pending name='Task-1' coro=<main() running at /Users/satyamsoni/Documents/pyconhk/pyconhk_fastapi_talk/orders-api-demo/scripts/asyncio_debug_demo.py:42> cb=[_run_until_complete_cb() at /Users/satyamsoni/.local/share/uv/python/cpython-3.14.7-macos-aarch64-none/lib/python3.14/asyncio/base_events.py:181] created at /Users/satyamsoni/.local/share/uv/python/cpython-3.14.7-macos-aarch64-none/lib/python3.14/asyncio/runners.py:110> took 1.056 seconds
+--- BAD: requests.get() inside async def ---
+--- GOOD: httpx.AsyncClient ---
+(no slow-callback warning expected above for the GOOD call)

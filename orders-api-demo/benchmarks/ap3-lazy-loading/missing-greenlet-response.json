@@ -1,0 +1,5 @@
+{
+    "mode": "bad-crash-sync-attribute-access",
+    "error_type": "MissingGreenlet",
+    "error": "greenlet_spawn has not been called; can't call await_only() here. Was IO attempted in an unexpected place? (Background on this error at: https://sqlalche.me/e/20/xd2s)"
+}

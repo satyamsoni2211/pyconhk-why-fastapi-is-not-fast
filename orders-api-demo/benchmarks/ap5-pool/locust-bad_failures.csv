@@ -1,0 +1,2 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/demo/ap5/query,HTTPError('500 Server Error: Internal Server Error for url: /demo/ap5/query'),19,2026-08-17T19:14:18Z,2026-08-17T19:14:33Z

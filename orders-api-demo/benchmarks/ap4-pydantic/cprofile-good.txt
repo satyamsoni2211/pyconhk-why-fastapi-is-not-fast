@@ -1,0 +1,19 @@
+=== GOOD (from_attributes, single pass): 200 orders x 20 repeats ===
+         116463 function calls (116319 primitive calls) in 0.030 seconds
+
+   Ordered by: cumulative time
+   List reduced from 12 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     4000    0.001    0.000    0.030    0.000 /Users/satyamsoni/Documents/pyconhk/pyconhk_fastapi_talk/orders-api-demo/app/schemas_ap4.py:104(good_transform)
+     4000    0.001    0.000    0.021    0.000 /Users/satyamsoni/Documents/pyconhk/pyconhk_fastapi_talk/orders-api-demo/.venv/lib/python3.14/site-packages/pydantic/main.py:693(model_validate)
+     4000    0.012    0.000    0.020    0.000 {method 'validate_python' of 'pydantic_core._pydantic_core.SchemaValidator' objects}
+     4000    0.001    0.000    0.008    0.000 /Users/satyamsoni/Documents/pyconhk/pyconhk_fastapi_talk/orders-api-demo/.venv/lib/python3.14/site-packages/pydantic/main.py:427(model_dump)
+     4000    0.007    0.000    0.007    0.000 {method 'to_python' of 'pydantic_core._pydantic_core.SchemaSerializer' objects}
+    64160    0.006    0.000    0.006    0.000 /Users/satyamsoni/Documents/pyconhk/pyconhk_fastapi_talk/orders-api-demo/.venv/lib/python3.14/site-packages/sqlalchemy/orm/attributes.py:555(__get__)
+    16040    0.001    0.000    0.002    0.000 <frozen abc>:117(__instancecheck__)
+    16040    0.001    0.000    0.001    0.000 {built-in method _abc._abc_instancecheck}
+     74/2    0.000    0.000    0.000    0.000 <frozen abc>:121(__subclasscheck__)
+     74/2    0.000    0.000    0.000    0.000 {built-in method _abc._abc_subclasscheck}
+
+
