@@ -1,12 +1,45 @@
 import os
 
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/orders")
 os.environ.setdefault("PAYMENT_GATEWAY_URL", "http://localhost:8080")
+
+import socket
+import subprocess
+import sys
+import time
+from urllib.parse import urlparse
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def payment_gateway():
+    """Start the bundled mock gateway if nothing is listening on PAYMENT_GATEWAY_URL."""
+    url = urlparse(os.environ["PAYMENT_GATEWAY_URL"])
+    host, port = url.hostname, url.port or 80
+
+    def listening() -> bool:
+        with socket.socket() as sock:
+            sock.settimeout(0.2)
+            return sock.connect_ex((host, port)) == 0
+
+    if listening():
+        yield
+        return
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "mock_gateway.main:app", "--port", str(port), "--log-level", "warning"]
+    )
+    try:
+        for _ in range(50):
+            if listening():
+                break
+            time.sleep(0.1)
+        yield
+    finally:
+        proc.terminate()
+        proc.wait()
 
 
 @pytest.fixture

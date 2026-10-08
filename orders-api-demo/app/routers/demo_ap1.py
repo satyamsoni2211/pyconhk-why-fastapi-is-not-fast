@@ -39,6 +39,7 @@ async def executor_bridge_call(request: Request) -> dict[str, str]:
     settings = get_settings()
     loop = asyncio.get_running_loop()
     resp = await loop.run_in_executor(
-        None, lambda: requests.get(f"{settings.payment_gateway_url}/delay/1", timeout=10)
+        None,
+        lambda: requests.get(f"{settings.payment_gateway_url}/delay/1", timeout=10),
     )
     return {"gateway_status": str(resp.status_code), "mode": "bridge-run-in-executor"}

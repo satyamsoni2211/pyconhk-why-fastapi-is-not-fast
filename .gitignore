@@ -12,3 +12,4 @@ uv.lock.bak
 benchmarks/*/*.raw
 .pytest_cache/
 *.egg-info/
+orders-api-demo/db/

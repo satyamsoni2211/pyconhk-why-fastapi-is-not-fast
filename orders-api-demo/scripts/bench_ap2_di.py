@@ -6,12 +6,13 @@ Run against the live dockerized app:
     uv run python scripts/bench_ap2_di.py
 """
 
+import os
 import statistics
 import time
 
 import httpx
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:8000")
 N_REQUESTS = 50
 
 

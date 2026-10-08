@@ -34,6 +34,25 @@ curl http://localhost:8000/orders?limit=5
 
 Interactive API docs: http://localhost:8000/docs
 
+### Without Docker (SQLite + bundled mock payment gateway)
+
+The default `DATABASE_URL` is a local SQLite file (`db/orders.db`), and
+`mock_gateway/` is a small stand-in for the payment gateway (`/delay/{n}`,
+`/get`, `/status/{code}`, `POST /charge`), so every demo runs with just `uv`:
+
+```bash
+uv sync
+uv run python scripts/seed_data.py                       # creates db/orders.db
+uv run uvicorn mock_gateway.main:app --port 8080          # terminal 1: payment gateway
+uv run uvicorn app.main:app --port 8000                   # terminal 2: Orders API
+```
+
+`PAYMENT_GATEWAY_URL` defaults to `http://localhost:8080`. `pytest` starts the
+mock gateway automatically if nothing is listening there. Notes: AP2's gap is
+much smaller on SQLite (no network handshake per engine), and AP5's slow query
+uses `asyncio.sleep` instead of Postgres' `pg_sleep`; use the Docker setup for
+the Postgres numbers captured in `benchmarks/`.
+
 ## Domain model
 
 `Customer → Order → OrderItem`, seeded with 200 customers, 2000 orders, and
@@ -133,6 +152,7 @@ app/
   routers/
     orders.py            Baseline create/list/detail endpoints
     demo_ap1.py..demo_ap5.py   One router per anti-pattern
+mock_gateway/              Mock payment gateway (FastAPI) used instead of go-httpbin when not on Docker
 scripts/                  Seeding + every profiling/benchmark script
 benchmarks/                One folder per anti-pattern with real captured output + README
 tests/                      pytest suite, one file per anti-pattern

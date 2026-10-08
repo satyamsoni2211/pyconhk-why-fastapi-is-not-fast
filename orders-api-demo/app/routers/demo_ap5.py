@@ -6,11 +6,12 @@ anti-pattern is demonstrated by restarting the app process between locust
 runs rather than a bad/good endpoint pair.
 
 `/demo/ap5/query` deliberately holds its connection for ~300ms
-(`pg_sleep`) to simulate a realistic report-style query — long enough that
+(`pg_sleep`, or `asyncio.sleep` on SQLite) to simulate a realistic report-style query — long enough that
 a too-small pool visibly starves under concurrent load within a short
 locust run.
 """
 
+import asyncio
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -28,7 +29,16 @@ SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
 @router.get("/query")
 async def slow_query(session: SessionDep):
-    await session.execute(text("SELECT pg_sleep(0.3)"))
+    # SELECT 1 checks a connection out of the pool; it stays checked out for
+    # the rest of the request, so the sleep below holds it for ~300ms.
+    if session.bind.dialect.name == "postgresql":
+        await session.execute(text("SELECT pg_sleep(0.3)"))
+    else:
+        # SQLite has no pg_sleep: hold the pooled connection explicitly. Held
+        # longer than the Postgres query so the bad pool (15 conns, 2s timeout)
+        # reliably starves: 100 users / (15 / 0.6s) ≈ 4s queue wait > 2s timeout.
+        await session.execute(text("SELECT 1"))
+        await asyncio.sleep(0.6)
     result = await session.execute(select(Order).limit(10))
     return {"n": len(result.scalars().all())}
 

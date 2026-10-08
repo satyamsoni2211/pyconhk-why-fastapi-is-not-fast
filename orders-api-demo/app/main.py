@@ -1,16 +1,22 @@
+import logging
 from contextlib import asynccontextmanager
 
 import httpx
 from fastapi import FastAPI
 
-from app.config import get_settings
+from app.config import MODULE_ROOT, get_settings
 from app.db import build_engine, build_sessionmaker
 from app.models import Base
 from app.routers import demo_ap1, demo_ap2, demo_ap3, demo_ap4, demo_ap5, orders
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if not MODULE_ROOT.exists():
+        logger.warning(f"{MODULE_ROOT} does not exists , creating ")
+        MODULE_ROOT.mkdir()
     settings = get_settings()
     engine = build_engine(settings)
     async with engine.begin() as conn:
@@ -29,7 +35,9 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 
-app = FastAPI(title="Orders API — PyCon HK 2026 FastAPI performance demo", lifespan=lifespan)
+app = FastAPI(
+    title="Orders API — PyCon HK 2026 FastAPI performance demo", lifespan=lifespan
+)
 app.include_router(orders.router)
 app.include_router(demo_ap1.router)
 app.include_router(demo_ap2.router)

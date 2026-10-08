@@ -15,12 +15,11 @@ from sqlalchemy import event, select
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import selectinload
 
+from app.config import get_settings
 from app.db import build_sessionmaker
 from app.models import Order
 
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/orders"
-)
+DATABASE_URL = os.environ.get("DATABASE_URL") or get_settings().database_url
 LIMIT = 5
 
 

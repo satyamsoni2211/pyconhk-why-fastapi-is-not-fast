@@ -1,7 +1,10 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+MODULE_ROOT = Path(__file__).parent.parent / "db"
 
 # Anti-pattern 5 (connection pool starvation) is a process-level config, not a
 # per-request one — asyncpg pool size is fixed when the engine is created.
@@ -25,7 +28,8 @@ _POOL_PROFILES = {
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/orders"
+    # database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/orders"
+    database_url: str = f"sqlite+aiosqlite:///{MODULE_ROOT}/orders.db"
     payment_gateway_url: str = "http://localhost:8080"
     pool_mode: Literal["bad", "good"] = "good"
 
