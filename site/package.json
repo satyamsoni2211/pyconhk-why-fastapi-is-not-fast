@@ -1,0 +1,16 @@
+{
+  "name": "fastapi-workshop-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Documentation site for Why Your FastAPI Is Not Fast (PyCon HK 2026)",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.43"
+  }
+}

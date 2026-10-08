@@ -142,3 +142,19 @@ Reading tips:
 If you take one file away from this repo, make it `CHECKLIST.md` — run your
 own FastAPI service through those five checks before you trust it under
 real concurrency.
+
+---
+
+## Documentation site
+
+A browsable version of this guide, with the five anti-patterns, runnable demo
+commands, the benchmarks, and a reference section, lives in [`site/`](site/).
+It is a VitePress project. To run it locally:
+
+```bash
+cd site
+npm ci
+npm run dev          # http://localhost:5173
+```
+
+See [`site/README.md`](site/README.md) for build and deploy notes.

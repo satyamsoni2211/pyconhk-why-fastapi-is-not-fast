@@ -13,3 +13,7 @@ benchmarks/*/*.raw
 .pytest_cache/
 *.egg-info/
 orders-api-demo/db/
+site/node_modules
+site/.vitepress/cache
+site/.vitepress/dist
+site/.vercel
