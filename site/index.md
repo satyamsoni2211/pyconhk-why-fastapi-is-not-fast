@@ -22,6 +22,36 @@ hero:
 
 <div class="home-section">
 
+## Follow along with the slides
+
+The talk deck is published right here, so you can open it on your own screen while I present, or read it afterwards.
+
+</div>
+
+<FeatureGrid :cols="2">
+
+<GlassCard title="Interactive slide deck" badge="Slides">
+<template #icon>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+</template>
+Animated blocking vs non-blocking flow, step-by-step code highlights and live-demo charts. Use the arrow keys to move, <kbd>S</kbd> for speaker view and <kbd>O</kbd> for the overview.
+
+<a href="/slides/" target="_blank" rel="noopener">Open the slides →</a>
+</GlassCard>
+
+<GlassCard title="Prefer a PDF?" badge="Download">
+<template #icon>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+</template>
+A static copy of the deck for offline reading, printing or sharing.
+
+<a href="/slides.pdf" target="_blank" rel="noopener">Download the PDF →</a>
+</GlassCard>
+
+</FeatureGrid>
+
+<div class="home-section">
+
 ## The five anti-patterns
 
 FastAPI gives you the tools, but it does not protect you from yourself. Each card below is one anti-pattern from the talk, with the headline measurement from the captured Postgres runs. Each pattern has a `bad` and a `good` endpoint on the same running service.
@@ -128,3 +158,4 @@ Clone the repo, start the services, and reproduce every demo yourself with the S
 - [Anti-pattern overview](/anti-patterns/)
 - [Endpoints](/reference/endpoints)
 - [About the talk](/about)
+- <a href="/slides/" target="_blank" rel="noopener">Slide deck</a>
