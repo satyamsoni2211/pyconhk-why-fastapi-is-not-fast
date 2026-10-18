@@ -16,7 +16,7 @@ hero:
       link: /reference/checklist
     - theme: alt
       text: Open the slides
-      link: /slides/index.html
+      link: /slides/
       target: _blank
 ---
 

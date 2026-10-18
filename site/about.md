@@ -31,7 +31,7 @@ The talk is about what happens *inside* route handlers and dependencies. Tracing
 | Resource | Link |
 |---|---|
 | Source repository | [GitHub](https://github.com/satyamsoni2211/pyconhk-why-fastapi-is-not-fast) |
-| Slides, interactive (reveal.js) | <a href="/slides/index.html" target="_blank">Open the slides</a> |
+| Slides, interactive (reveal.js) | <a href="/slides/" target="_blank">Open the slides</a> |
 | Slides, PDF | [slides.pdf](/slides.pdf) |
 | Slides, source (Marp) | [talk/slides.md](https://github.com/satyamsoni2211/pyconhk-why-fastapi-is-not-fast/blob/main/talk/slides.md) |
 | Presenter guide | [talk/PRESENTER_GUIDE.md](https://github.com/satyamsoni2211/pyconhk-why-fastapi-is-not-fast/blob/main/talk/PRESENTER_GUIDE.md) |

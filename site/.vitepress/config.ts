@@ -42,7 +42,7 @@ export default defineConfig({
       { text: 'Anti-patterns', link: '/anti-patterns/', activeMatch: '^/anti-patterns/' },
       { text: 'Demo', link: '/demo/', activeMatch: '^/demo/' },
       { text: 'Reference', link: '/reference/checklist', activeMatch: '^/reference/' },
-      { text: 'Slides', link: '/slides/index.html', target: '_blank' },
+      { text: 'Slides', link: '/slides/', target: '_blank' },
     ],
 
     sidebar: [
