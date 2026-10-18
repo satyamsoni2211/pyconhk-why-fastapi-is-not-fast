@@ -52,6 +52,11 @@ def profile_transform(name: str, fn, orders: list[Order]) -> str:
 
 async def main() -> None:
     orders = await fetch_orders()
+    if not orders:
+        raise SystemExit(
+            f"No orders found at {DATABASE_URL}.\n"
+            "Seed first:  PYTHONPATH=. uv run python scripts/seed_data.py"
+        )
     print(f"Loaded {len(orders)} orders with items for profiling.\n")
 
     bad_report = profile_transform("BAD (nested validators + round-trip)", bad_transform, orders)

@@ -14,6 +14,10 @@ hero:
     - theme: alt
       text: View the checklist
       link: /reference/checklist
+    - theme: alt
+      text: Open the slides
+      link: /slides/index.html
+      target: _blank
 ---
 
 <div class="home-section">
