@@ -16,12 +16,28 @@
 <section class="title-slide" data-background-image="/slides/img/bg-title.png" data-background-size="cover">
   <h1>Why Your FastAPI Is Not Fast</h1>
   <div class="sub">Five silent killers hiding in your async code</div>
-  <div class="by">Satyam Soni &nbsp;·&nbsp; PyCon HK 2026 &nbsp;·&nbsp; Software Engineering &amp; Platforms</div>
+  <div class="speaker"><span class="name">Satyam Soni</span></div>
+  <div class="by">PyCon HK 2026 &nbsp;·&nbsp; Software Engineering &amp; Platforms</div>
   <aside class="notes">
     0:00 — Intro (say this): You switched to FastAPI for speed, and your production service is somehow slower than the Flask or Django app it replaced.
     In the next 30 minutes: five silent killers hiding in your async code — each with the crash or slowdown, real profiling output, and a measured before/after fix from an Orders API you can run yourself.
     Keys: S = speaker view, O = overview, F = fullscreen, ? = help, Esc = overview.
   </aside>
+</section>
+
+<!-- ============ 1b  SHOW OF HANDS ============ -->
+<section data-background-image="/slides/img/bg-content.png" data-background-size="cover">
+  <h2>Quick show of hands <span class="wave">✋</span></h2>
+  <div style="margin-top:6px">
+    <div class="check hand fragment pop" data-fragment-index="1"><div class="n">✋</div><div>Who runs <b>FastAPI in production</b> today?</div></div>
+    <div class="check hand fragment pop" data-fragment-index="2"><div class="n">✋</div><div>Who has called <span class="i">requests</span> or a sync DB driver inside <span class="i">async def</span>?</div></div>
+    <div class="check hand fragment pop" data-fragment-index="3"><div class="n">✋</div><div>Who has seen an API <b>fly locally</b> but <b class="red">crawl under real load</b>?</div></div>
+    <div class="check hand fragment pop" data-fragment-index="4"><div class="n">✋</div><div>Who has <b>profiled</b> a Python service — py-spy, cProfile, anything?</div></div>
+    <div class="check hand fragment pop" data-fragment-index="5"><div class="n">✋</div><div>Who knows SQLAlchemy's <b>default pool size</b>?
+      <span class="fragment late grey" data-fragment-index="6" style="margin-left:10px">→ <span class="i">5</span> + <span class="i">10</span> overflow</span></div></div>
+  </div>
+  <aside class="notes">~1 min. Keep it brisk, one breath per question; read the room and lean on whichever anti-patterns get the most hands later.
+    1: sets the baseline — production users vs. curious. 2: most hands sheepishly go up; that's AP1. 3: that's the story on the next slide. 4: if few hands, the toolkit slide at the end matters more. 5: almost nobody knows — click once more for the answer; that's AP5, the tiny pool.</aside>
 </section>
 
 <!-- ============ 2  INCIDENT ============ -->
@@ -519,10 +535,31 @@ out, timeout 2.00</code></pre></div>
   <aside class="notes">Every one of these is free, open source, and you saw all five used for real today.</aside>
 </section>
 
+<!-- ============ 28b  KEY TAKEAWAYS ============ -->
+<section data-background-image="/slides/img/bg-content.png" data-background-size="cover">
+  <h2>Key takeaways</h2>
+  <div class="takeaways">
+    <div class="card fragment pop" data-fragment-index="1"><div class="n">1</div>
+      <div class="t"><span class="i">async def</span> is a promise, not a superpower</div>
+      <div class="d">It only yields at <span class="i">await</span>. One sync call and everyone waits.</div></div>
+    <div class="card fragment pop" data-fragment-index="2"><div class="n">2</div>
+      <div class="t">Measure, don't guess</div>
+      <div class="d">Every fix today started with a profile, a query count or a load test — not a hunch.</div></div>
+    <div class="card fragment pop" data-fragment-index="3"><div class="n">3</div>
+      <div class="t">Defaults are for tutorials</div>
+      <div class="d">Pool sizes, lazy loading, per-request setup — tune them for real traffic.</div></div>
+  </div>
+  <p class="closer fragment pop" data-fragment-index="4">FastAPI is fast. <strong class="red">Make sure your code lets it be.</strong></p>
+  <aside class="notes">~1 min. Three things to remember if you forget everything else. 1: async is cooperative — it only helps if every call cooperates. 2: none of today's numbers were guesses; profile first, then fix. 3: the five killers were mostly defaults nobody revisited. Land the closing line, pause, then go to Questions.</aside>
+</section>
+
 <!-- ============ 29  CLOSE ============ -->
-<section class="title-slide" data-background-image="/slides/img/bg-title.png" data-background-size="cover">
+<section class="title-slide close-slide" data-background-image="/slides/img/bg-title.png" data-background-size="cover">
   <h1>Questions?</h1>
-  <div class="sub" style="font-style:normal;font-size:30px;color:var(--blue)">github.com/satyamsoni2211/fastapi-performance-deep-dive</div>
+  <div class="qrs">
+    <div class="qr"><img src="/slides/img/qr-repo.svg" alt="QR code: GitHub repository"><div class="lab">CODE &amp; BENCHMARKS</div><div class="url">github.com/satyamsoni2211/<br>pyconhk-why-fastapi-is-not-fast</div></div>
+    <div class="qr"><img src="/slides/img/qr-linkedin.svg" alt="QR code: LinkedIn profile"><div class="lab">LET'S CONNECT</div><div class="url">linkedin.com/in/-satyamsoni</div></div>
+  </div>
   <div class="by">Clone it. <span class="i">docker compose up</span>. Check every number yourself.</div>
   <aside class="notes">27:00–30:00. Everything you saw — every number — is in this repo. Clone it, docker compose up, reproduce every measurement. None of this should be trust-me-bro. Then Q&amp;A.</aside>
 </section>

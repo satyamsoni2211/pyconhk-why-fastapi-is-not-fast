@@ -13,4 +13,4 @@ Open `index.html` in Chrome/Edge/Firefox. Works fully offline (reveal.js, fonts 
 
 PDF export: open `index.html?print-pdf` in Chrome → Print → Save as PDF (background graphics on).
 
-Animated slides: 4 (async framing), 7 (blocking vs non-blocking timeline — 2 clicks), 8 (live-demo chart).
+Animated slides: 5 (async framing), 8 (blocking vs non-blocking timeline — 2 clicks), 9 (live-demo chart).
