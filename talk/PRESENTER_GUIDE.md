@@ -68,7 +68,7 @@ so at an `await`. Everything today lives inside that one sentence.
 - Show the bad dependency code (new engine per request).
 - State the number cold: "17.5 milliseconds average, versus 1.7. Ten
   times, just from rebuilding a connection pool you already had."
-- Optionally live-run `uv run python scripts/bench_ap2_di.py` if time
+- Optionally live-run `uv run python scripts/ap2_di_benchmark.py` if time
   allows (~2s to run) — otherwise show the captured numbers slide.
 - Land the fix: build once in the lifespan, `Annotated[T, Depends(...)]`.
 
@@ -147,7 +147,7 @@ numbers (3.046s / 1.040s), which are the real ones from rehearsal.
 ### AP2 — DI lifecycle
 
 ```bash
-uv run python scripts/bench_ap2_di.py
+uv run python scripts/ap2_di_benchmark.py
 ```
 Expected: `bad` mean well above `good` mean (captured: 17.48ms vs 1.73ms).
 Takes ~2s to run — fine to do live if AP1 ran on time.
@@ -195,14 +195,14 @@ The safe default is the captured slide; this is the stretch goal.
 ```bash
 POOL_MODE=bad docker compose up -d app && sleep 3
 uv run locust --headless -u 100 -r 100 -t 15s --host http://localhost:8000 \
-  --csv /tmp/live-bad -f scripts/locustfile.py
+  --csv /tmp/live-bad -f scripts/ap5_locustfile.py
 ```
 Expected: nonzero failure count, median latency in the seconds.
 
 ```bash
 POOL_MODE=good docker compose up -d app && sleep 3
 uv run locust --headless -u 100 -r 100 -t 15s --host http://localhost:8000 \
-  --csv /tmp/live-good -f scripts/locustfile.py
+  --csv /tmp/live-good -f scripts/ap5_locustfile.py
 ```
 Expected: 0 failures, much lower median latency.
 

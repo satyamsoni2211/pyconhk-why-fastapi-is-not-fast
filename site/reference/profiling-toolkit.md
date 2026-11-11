@@ -30,8 +30,8 @@ py-spy record --pid <PID> -o out.svg
 This repo wraps it for the Docker app container. The script fires concurrent requests while it records:
 
 ```bash
-./scripts/profile_pyspy.sh bad flamegraph-bad.svg
-./scripts/profile_pyspy.sh good flamegraph-good.svg
+./scripts/ap1_pyspy_flamegraph.sh bad flamegraph-bad.svg
+./scripts/ap1_pyspy_flamegraph.sh good flamegraph-good.svg
 ```
 
 The script takes `<bad|good|bridge>`, an output name, and an optional concurrency (default 3). It needs Docker because it uses `docker compose exec`. The captured graphs are in `benchmarks/ap1-blocking/` and `talk/assets/`.
@@ -45,13 +45,13 @@ A wide block near the top of a stack is where time was spent. For AP1 you are lo
 Run with `PYTHONASYNCIODEBUG=1`. asyncio logs any task that holds the loop longer than its slow-callback threshold. It names the task and prints the time taken, which is the simplest way to find a blocking call.
 
 ```bash
-PYTHONASYNCIODEBUG=1 uv run python scripts/asyncio_debug_demo.py
+PYTHONASYNCIODEBUG=1 uv run python scripts/ap1_asyncio_debug.py
 ```
 
 The script calls the gateway through both the bad and the good path. The bad path produces the warning and the good path does not.
 
 ```text
-WARNING:asyncio:Executing <Task ...> took 1.056 seconds
+WARNING:asyncio: Executing <Task name='bad_blocking_call' ...> took 1.022 seconds
 ```
 
 Debug mode slows the loop down. Use it to find problems, not to measure them.
@@ -67,7 +67,7 @@ python -m cProfile -o out.prof script.py
 This repo's script profiles the AP4 transforms over real seeded orders:
 
 ```bash
-PYTHONPATH=. uv run python scripts/pydantic_cprofile_demo.py
+PYTHONPATH=. uv run python scripts/ap4_pydantic_cprofile.py
 ```
 
 To read a saved profile:
@@ -87,7 +87,7 @@ create_async_engine(url, echo=True)
 This repo's script runs the AP3 bad and good paths against the same data and prints the counts:
 
 ```bash
-SQLALCHEMY_WARN_20=1 PYTHONPATH=. uv run python scripts/sqlalchemy_echo_demo.py
+SQLALCHEMY_WARN_20=1 PYTHONPATH=. uv run python scripts/ap3_sqlalchemy_echo.py
 ```
 
 The log is verbose. Use it to count, not to present live. In a test, a `before_cursor_execute` listener counts queries without printing them. The repo's AP3 test does this.
@@ -99,10 +99,10 @@ A load-testing tool written in Python. It drives many concurrent users against t
 ```bash
 locust --headless -u 50 -r 10 -t 30s \
   --host http://localhost:8000 \
-  --csv my-run -f scripts/locustfile.py
+  --csv my-run -f scripts/ap5_locustfile.py
 ```
 
-The repo's `scripts/locustfile.py` targets `/demo/ap5/query`. The `--csv` prefix writes stats, stats history, failures, and exceptions files. For interactive runs, omit `--headless` and open the web UI on port 8089.
+The repo's `scripts/ap5_locustfile.py` targets `/demo/ap5/query`. The `--csv` prefix writes stats, stats history, failures, and exceptions files. For interactive runs, omit `--headless` and open the web UI on port 8089.
 
 ::: info Restart between pool profiles
 The AP5 pool is fixed when the process starts. Restart the app with `POOL_MODE=bad` and then `POOL_MODE=good`, running locust against each. See [AP5](/anti-patterns/ap5-pool-starvation).

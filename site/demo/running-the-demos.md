@@ -41,7 +41,7 @@ Make it visible with the health check. Run `curl localhost:8000/demo/ap1/bad` in
 asyncio debug mode needs only the gateway, not the app:
 
 ```bash
-PYTHONASYNCIODEBUG=1 uv run python scripts/asyncio_debug_demo.py
+PYTHONASYNCIODEBUG=1 uv run python scripts/ap1_asyncio_debug.py
 ```
 
 It prints `Executing <Task …> took 1.0xx seconds` for the bad call, and nothing for the good one.
@@ -49,7 +49,7 @@ It prints `Executing <Task …> took 1.0xx seconds` for the bad call, and nothin
 The py-spy flame graph needs Docker, because the script uses `docker compose exec`:
 
 ```bash
-./scripts/profile_pyspy.sh bad flamegraph-bad.svg
+./scripts/ap1_pyspy_flamegraph.sh bad flamegraph-bad.svg
 ```
 
 Without Docker, open the captured SVGs in `talk/assets/` instead.
@@ -61,7 +61,7 @@ Endpoints: `/demo/ap2/bad`, `/demo/ap2/good`.
 ```bash
 curl localhost:8000/demo/ap2/bad     # {"mode":"bad-new-engine-and-client-per-request","elapsed_seconds":...}
 curl localhost:8000/demo/ap2/good
-BASE_URL=http://localhost:8000 uv run python scripts/bench_ap2_di.py   # 50 requests each
+BASE_URL=http://localhost:8000 uv run python scripts/ap2_di_benchmark.py   # 50 requests each
 ```
 
 **Expected, Postgres capture:** bad mean 17.48 ms, good mean 1.73 ms, about 10×.
@@ -86,7 +86,7 @@ To count the queries, run the echo script. It prints every statement, so do not 
 ```bash
 SQLALCHEMY_WARN_20=1 PYTHONPATH=. \
   DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders" \
-  uv run python scripts/sqlalchemy_echo_demo.py
+  uv run python scripts/ap3_sqlalchemy_echo.py
 ```
 
 **Expected** summary: `bad-n1 issued 6 queries, good issued 2 queries` for five orders. Scale with `?limit=100` to get 101 against 2.
@@ -109,7 +109,7 @@ Compare `elapsed_seconds`. Only the transform is timed, not the fetch.
 For function-call counts:
 
 ```bash
-PYTHONPATH=. uv run python scripts/pydantic_cprofile_demo.py
+PYTHONPATH=. uv run python scripts/ap4_pydantic_cprofile.py
 ```
 
 **Expected, SQLite:** about 290k calls for bad and 111k for good, about 2.6×.
@@ -126,13 +126,13 @@ This one needs a restart between two runs, because the pool is fixed when the pr
 POOL_MODE=bad uv run uvicorn app.main:app --port 8000
 curl localhost:8000/demo/ap5/info          # confirm "pool_mode":"bad"
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
-  --csv my-run-bad -f scripts/locustfile.py
+  --csv my-run-bad -f scripts/ap5_locustfile.py
 
 # stop the app (Ctrl-C), then --- GOOD ---
 POOL_MODE=good uv run uvicorn app.main:app --port 8000
 curl localhost:8000/demo/ap5/info          # confirm "pool_mode":"good"
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
-  --csv my-run-good -f scripts/locustfile.py
+  --csv my-run-good -f scripts/ap5_locustfile.py
 ```
 
 The `--csv` prefixes write to the working directory. The committed captures in `benchmarks/ap5-pool/` stay untouched.
@@ -140,7 +140,7 @@ The `--csv` prefixes write to the working directory. The committed captures in `
 **Expected, Postgres capture:** bad 2.1% failures at 47.8 req/s, good 0% at 179.3 req/s.
 **Expected, SQLite:** bad about 40 to 45% failures at about 43 req/s, good 0% at about 97 req/s.
 
-The interactive alternative is `uv run locust -f scripts/locustfile.py --host http://localhost:8000`, then open `http://localhost:8089` for live charts. That works well on a projector.
+The interactive alternative is `uv run locust -f scripts/ap5_locustfile.py --host http://localhost:8000`, then open `http://localhost:8089` for live charts. That works well on a projector.
 
 ::: danger Reset after the run
 Whether or not you did the live run, leave the stack on the good profile:

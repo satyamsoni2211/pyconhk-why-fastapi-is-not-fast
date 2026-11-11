@@ -82,7 +82,7 @@ curl localhost:8000/demo/ap2/good
 ```
 
 ```bash [benchmark, 50 each]
-BASE_URL=http://localhost:8000 uv run python scripts/bench_ap2_di.py
+BASE_URL=http://localhost:8000 uv run python scripts/ap2_di_benchmark.py
 ```
 
 :::
@@ -118,7 +118,7 @@ The automated test `tests/test_ap2_di.py` asserts that `bad` stays more than 1.5
 | Check | How | What to look for |
 |---|---|---|
 | Code review | Search for `create_async_engine`, `httpx.AsyncClient(`, or `build_*` calls | A constructor inside a function used with `Depends` |
-| Latency benchmark | Compare an endpoint against a lifespan-singleton version, as in `scripts/bench_ap2_di.py` | A large mean gap for a trivial query |
+| Latency benchmark | Compare an endpoint against a lifespan-singleton version, as in `scripts/ap2_di_benchmark.py` | A large mean gap for a trivial query |
 | Connection churn | Watch connection counts on the database under load | Connections opened and closed per request |
 
 ## Checklist
@@ -133,7 +133,7 @@ The automated test `tests/test_ap2_di.py` asserts that `bad` stays more than 1.5
 
 - "17.5 milliseconds average, versus 1.7. Ten times, just from rebuilding a connection pool you already had."
 - The overhead is constant per request, and it also destroys connection reuse. Under load you churn sockets and can exhaust the database's `max_connections`.
-- Optional live run: `scripts/bench_ap2_di.py` takes about 2 seconds. If time is short, show the captured table.
+- Optional live run: `scripts/ap2_di_benchmark.py` takes about 2 seconds. If time is short, show the captured table.
 
 ## Related
 

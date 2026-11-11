@@ -89,7 +89,7 @@ The compose file starts three services:
 Interactive API docs are at `http://localhost:8000/docs` once the app is running.
 
 ::: warning Docker-only commands
-`scripts/profile_pyspy.sh` runs `docker compose exec`, so it only works in this mode. The flame graphs in `benchmarks/` were produced this way.
+`scripts/ap1_pyspy_flamegraph.sh` runs `docker compose exec`, so it only works in this mode. The flame graphs in `benchmarks/` were produced this way.
 :::
 
 ## Configuration

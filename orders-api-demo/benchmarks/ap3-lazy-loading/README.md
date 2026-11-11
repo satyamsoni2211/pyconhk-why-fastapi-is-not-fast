@@ -29,7 +29,7 @@ order. Real `echo=True` SQL log, 5 orders:
 - **bad-n1**: 6 queries total (1 for the order list + 5, one per order) — [`echo-bad.log`](echo-bad.log)
 - **good (selectinload)**: 2 queries total (1 for the order list + 1 batched `IN (...)` query) — [`echo-good.log`](echo-good.log)
 
-Reproduce: `SQLALCHEMY_WARN_20=1 PYTHONPATH=. uv run python scripts/sqlalchemy_echo_demo.py`
+Reproduce: `SQLALCHEMY_WARN_20=1 PYTHONPATH=. uv run python scripts/ap3_sqlalchemy_echo.py`
 
 Both paths return identical item counts (verified — see
 [`tests/test_ap3_lazy_loading.py`](../../tests/test_ap3_lazy_loading.py)),

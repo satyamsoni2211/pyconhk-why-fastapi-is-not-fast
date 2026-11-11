@@ -98,7 +98,7 @@ curl "localhost:8000/demo/ap3/good?limit=5"
 ```
 
 ```bash [count the queries]
-PYTHONPATH=. uv run python scripts/sqlalchemy_echo_demo.py
+PYTHONPATH=. uv run python scripts/ap3_sqlalchemy_echo.py
 ```
 
 :::

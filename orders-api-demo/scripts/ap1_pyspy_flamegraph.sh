@@ -2,8 +2,11 @@
 # Record a py-spy flame graph of the running app container while hitting one
 # of the AP1 demo endpoints concurrently.
 #
-# Usage: ./scripts/profile_pyspy.sh <bad|good|bridge> <output.svg>
+# AP1. Docker only (uses `docker compose exec`). Run from orders-api-demo/.
+#
+# Usage: ./scripts/ap1_pyspy_flamegraph.sh <bad|good|bridge> [output.svg] [concurrency]
 set -euo pipefail
+cd "$(dirname "$0")/.."
 
 MODE="${1:-bad}"
 OUT="${2:-flamegraph-$MODE.svg}"

@@ -1,18 +1,18 @@
 """Measure real per-request latency overhead of rebuilding DB engine + HTTP
 client on every request (AP2 'bad') vs reusing lifespan singletons ('good').
 
-Run against the live dockerized app:
+AP2. Needs the app running on BASE_URL (default http://localhost:8000):
 
-    uv run python scripts/bench_ap2_di.py
+    uv run scripts/ap2_di_benchmark.py
 """
 
-import os
 import statistics
 import time
 
+import _common
 import httpx
 
-BASE_URL = os.environ.get("BASE_URL", "http://localhost:8000")
+BASE_URL = _common.base_url()
 N_REQUESTS = 50
 
 

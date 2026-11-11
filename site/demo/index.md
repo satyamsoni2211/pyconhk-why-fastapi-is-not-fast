@@ -30,7 +30,7 @@ The DEMO_GUIDE gives a 20-minute run of show. The talk itself is 30 minutes, wit
 |---|---|---|
 | 0 to 2 | Baseline | Show the baseline endpoints, and `/docs` |
 | 2 to 6 | AP1 | Three concurrent `bad` and `good` calls. Run the health-check trick. Show the asyncio debug output. |
-| 6 to 9 | AP2 | Run `bench_ap2_di.py`. Say Postgres is about 10×. |
+| 6 to 9 | AP2 | Run `ap2_di_benchmark.py`. Say Postgres is about 10×. |
 | 9 to 13 | AP3 | Show the 500 from `bad-crash`, then the query-count script |
 | 13 to 16 | AP4 | `curl` both endpoints, then the cProfile call counts |
 | 16 to 19 | AP5 | Restart in `bad`, run locust, restart in `good`, run locust. Show the timeout traceback. |
@@ -45,7 +45,7 @@ The presenter guide paces the 30-minute slot in segments. The live demos sit ins
 | 0:00 to 2:00 | Opening hook | None |
 | 2:00 to 5:00 | Framing: what `async` buys you | None |
 | 5:00 to 9:00 | AP1 | Bad and good, side by side |
-| 9:00 to 13:00 | AP2 | Optional: `bench_ap2_di.py` (about 2 s) |
+| 9:00 to 13:00 | AP2 | Optional: `ap2_di_benchmark.py` (about 2 s) |
 | 13:00 to 17:00 | AP3 | `bad-crash` first, then `bad-n1` and `good` |
 | 17:00 to 21:00 | AP4 | Not live. Show the captured cProfile. |
 | 21:00 to 25:00 | AP5 | Captured slide by default. Live variant only if ahead on time. |
@@ -62,7 +62,7 @@ Cut AP4's live `curl` first, since it is optional. If time is still tight, compr
 | Pattern | Live step | Fallback if the live step fails |
 |---|---|---|
 | [AP1](/anti-patterns/ap1-blocking-event-loop) | Three concurrent `bad` calls, then `good` | Captured 3.046 s and 1.040 s |
-| [AP2](/anti-patterns/ap2-di-lifecycle) | `bench_ap2_di.py` | Captured 17.48 ms and 1.73 ms table |
+| [AP2](/anti-patterns/ap2-di-lifecycle) | `ap2_di_benchmark.py` | Captured 17.48 ms and 1.73 ms table |
 | [AP3](/anti-patterns/ap3-lazy-loading) | `bad-crash` 500 response | `missing-greenlet-response.json`, the safest demo |
 | [AP4](/anti-patterns/ap4-pydantic-overhead) | Optional `curl` pair | Captured cProfile counts |
 | [AP5](/anti-patterns/ap5-pool-starvation) | Restart and locust, optional | Captured locust tables and the traceback |

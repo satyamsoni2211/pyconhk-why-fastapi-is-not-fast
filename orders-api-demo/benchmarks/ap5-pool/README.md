@@ -46,11 +46,11 @@ Reproduce:
 ```bash
 POOL_MODE=bad docker compose up -d app
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
-  --csv benchmarks/ap5-pool/locust-bad -f scripts/locustfile.py
+  --csv benchmarks/ap5-pool/locust-bad -f scripts/ap5_locustfile.py
 
 POOL_MODE=good docker compose up -d app
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
-  --csv benchmarks/ap5-pool/locust-good -f scripts/locustfile.py
+  --csv benchmarks/ap5-pool/locust-good -f scripts/ap5_locustfile.py
 ```
 
 ## The fix

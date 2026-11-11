@@ -37,10 +37,10 @@ Ratios are computed from the values shown: AP2 is 17.48 ÷ 1.73, AP5 throughput 
 | Pattern | How the number was produced |
 |---|---|
 | AP1 | Three concurrent `curl` requests to each endpoint, timed with `time`, against the dockerized app and the go-httpbin gateway. The gateway's `/delay/1` takes one second. |
-| AP1 (asyncio) | `PYTHONASYNCIODEBUG=1` with `scripts/asyncio_debug_demo.py`. The log records the slow callback warning. |
-| AP2 | `scripts/bench_ap2_di.py`: 50 sequential requests to each endpoint, reporting mean, p50 and p95 |
-| AP3 | `scripts/sqlalchemy_echo_demo.py` with `echo=True`, counting statements for 5 orders. The test suite checks the same counts with a `before_cursor_execute` listener. |
-| AP4 | `scripts/pydantic_cprofile_demo.py`: cProfile over 200 orders, repeated 20 times. Call counts are the stable comparison. |
+| AP1 (asyncio) | `PYTHONASYNCIODEBUG=1` with `scripts/ap1_asyncio_debug.py`. The log records the slow callback warning. |
+| AP2 | `scripts/ap2_di_benchmark.py`: 50 sequential requests to each endpoint, reporting mean, p50 and p95 |
+| AP3 | `scripts/ap3_sqlalchemy_echo.py` with `echo=True`, counting statements for 5 orders. The test suite checks the same counts with a `before_cursor_execute` listener. |
+| AP4 | `scripts/ap4_pydantic_cprofile.py`: cProfile over 200 orders, repeated 20 times. Call counts are the stable comparison. |
 | AP5 | `locust --headless -u 100 -r 100 -t 20s` against each pool profile, with a full app restart between profiles. |
 
 Call counts are more useful than wall time for AP4. They are stable across machines, while timings move with the hardware and load.

@@ -109,7 +109,7 @@ POOL_MODE=bad uv run uvicorn app.main:app --port 8000
 # in a second terminal:
 curl localhost:8000/demo/ap5/info          # confirm "pool_mode":"bad"
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
-  --csv my-run-bad -f scripts/locustfile.py
+  --csv my-run-bad -f scripts/ap5_locustfile.py
 ```
 
 ```bash [good profile]
@@ -117,11 +117,11 @@ uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
 POOL_MODE=good uv run uvicorn app.main:app --port 8000
 curl localhost:8000/demo/ap5/info          # confirm "pool_mode":"good"
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
-  --csv my-run-good -f scripts/locustfile.py
+  --csv my-run-good -f scripts/ap5_locustfile.py
 ```
 
 ```bash [interactive]
-uv run locust -f scripts/locustfile.py --host http://localhost:8000
+uv run locust -f scripts/ap5_locustfile.py --host http://localhost:8000
 # then open http://localhost:8089 for live charts
 ```
 

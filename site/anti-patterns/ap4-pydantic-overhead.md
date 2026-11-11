@@ -82,7 +82,7 @@ curl "localhost:8000/demo/ap4/good?limit=500"
 ```
 
 ```bash [function calls]
-PYTHONPATH=. uv run python scripts/pydantic_cprofile_demo.py
+PYTHONPATH=. uv run python scripts/ap4_pydantic_cprofile.py
 ```
 
 :::

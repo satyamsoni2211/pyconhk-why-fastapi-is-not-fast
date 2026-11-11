@@ -1,24 +1,24 @@
-"""cProfile bad_transform vs good_transform over real seeded orders.
+"""AP4: cProfile bad_transform vs good_transform over real seeded orders.
+Needs a seeded database:
 
-    PYTHONPATH=. uv run python scripts/pydantic_cprofile_demo.py
+    uv run scripts/ap4_pydantic_cprofile.py
 """
 
 import asyncio
 import cProfile
-import os
 import pstats
 from io import StringIO
 
+import _common
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import selectinload
 
-from app.config import get_settings
 from app.db import build_sessionmaker
 from app.models import Order
 from app.schemas_ap4 import bad_transform, good_transform
 
-DATABASE_URL = os.environ.get("DATABASE_URL") or get_settings().database_url
+DATABASE_URL = _common.database_url()
 N_ORDERS = 200
 N_REPEATS = 20  # amplify so cProfile has enough signal to be meaningful
 
@@ -55,7 +55,7 @@ async def main() -> None:
     if not orders:
         raise SystemExit(
             f"No orders found at {DATABASE_URL}.\n"
-            "Seed first:  PYTHONPATH=. uv run python scripts/seed_data.py"
+            "Seed first:  uv run scripts/seed_data.py"
         )
     print(f"Loaded {len(orders)} orders with items for profiling.\n")
 

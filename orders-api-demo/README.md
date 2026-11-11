@@ -99,31 +99,31 @@ docker compose up -d
 uv sync
 
 # AP1 — py-spy flame graphs + asyncio debug-mode warning
-./scripts/profile_pyspy.sh bad flamegraph-bad.svg
-./scripts/profile_pyspy.sh good flamegraph-good.svg
+./scripts/ap1_pyspy_flamegraph.sh bad flamegraph-bad.svg
+./scripts/ap1_pyspy_flamegraph.sh good flamegraph-good.svg
 PAYMENT_GATEWAY_URL="http://localhost:8080" PYTHONASYNCIODEBUG=1 \
-  uv run python scripts/asyncio_debug_demo.py
+  uv run python scripts/ap1_asyncio_debug.py
 
 # AP2 — DI lifecycle latency
-uv run python scripts/bench_ap2_di.py
+uv run python scripts/ap2_di_benchmark.py
 
 # AP3 — SQL echo + query counts
 SQLALCHEMY_WARN_20=1 PYTHONPATH=. \
   DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders" \
-  uv run python scripts/sqlalchemy_echo_demo.py
+  uv run python scripts/ap3_sqlalchemy_echo.py
 
 # AP4 — cProfile
 PYTHONPATH=. DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders" \
-  uv run python scripts/pydantic_cprofile_demo.py
+  uv run python scripts/ap4_pydantic_cprofile.py
 
 # AP5 — locust, bad config then good config
 POOL_MODE=bad docker compose up -d app
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
-  --csv benchmarks/ap5-pool/locust-bad -f scripts/locustfile.py
+  --csv benchmarks/ap5-pool/locust-bad -f scripts/ap5_locustfile.py
 
 POOL_MODE=good docker compose up -d app
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
-  --csv benchmarks/ap5-pool/locust-good -f scripts/locustfile.py
+  --csv benchmarks/ap5-pool/locust-good -f scripts/ap5_locustfile.py
 ```
 
 ## Running the automated tests

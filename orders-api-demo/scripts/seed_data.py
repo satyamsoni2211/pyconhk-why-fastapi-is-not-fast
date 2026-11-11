@@ -1,18 +1,16 @@
 """Seed the Orders API demo database with realistic volume.
 
-Run inside the app container so DATABASE_URL resolves to the compose `db`
-service:
+Works on the host (Docker hostnames are swapped for localhost) or inside the
+app container:
 
+    uv run scripts/seed_data.py
     docker compose exec app uv run python scripts/seed_data.py
 """
 
 import asyncio
 import random
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
+import _common
 from faker import Faker
 from sqlalchemy import text
 
@@ -28,7 +26,7 @@ fake = Faker()
 
 
 async def main() -> None:
-    settings = get_settings()
+    settings = get_settings().model_copy(update={"database_url": _common.database_url()})
     engine = build_engine(settings)
 
     async with engine.begin() as conn:

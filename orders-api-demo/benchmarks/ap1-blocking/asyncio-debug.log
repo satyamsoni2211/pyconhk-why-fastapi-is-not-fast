@@ -1,4 +1,8 @@
-WARNING:asyncio:Executing <Task pending name='Task-1' coro=<main() running at /Users/satyamsoni/Documents/pyconhk/pyconhk_fastapi_talk/orders-api-demo/scripts/asyncio_debug_demo.py:42> cb=[_run_until_complete_cb() at /Users/satyamsoni/.local/share/uv/python/cpython-3.14.7-macos-aarch64-none/lib/python3.14/asyncio/base_events.py:181] created at /Users/satyamsoni/.local/share/uv/python/cpython-3.14.7-macos-aarch64-none/lib/python3.14/asyncio/runners.py:110> took 1.056 seconds
 --- BAD: requests.get() inside async def ---
+WARNING:asyncio: Executing <Task finished name='bad_blocking_call' coro=<bad_blocking_call() done, defined at /Users/satyam_soni1/Documents/pyconhk-why-fastapi-is-not-fast/orders-api-demo/scripts/ap1_asyncio_debug.py:29> result=None created at /Users/satyam_soni1/.local/share/uv/python/cpython-3.14.0-macos-aarch64-none/lib/python3.14/asyncio/tasks.py:395> took 1.012 seconds
+    finished in 1.01s
+    ^ asyncio flagged the blocking call above
+
 --- GOOD: httpx.AsyncClient ---
-(no slow-callback warning expected above for the GOOD call)
+    finished in 1.02s
+    ^ no slow-callback warning: the loop stayed free

@@ -1,7 +1,7 @@
-"""Show real SQL echo output + query counts for AP3 (lazy loading): N+1 vs
-selectinload, on the same seeded data.
+"""AP3: show real SQL echo output + query counts for lazy loading (N+1) vs
+selectinload, on the same seeded data. Needs a seeded database:
 
-    SQLALCHEMY_WARN_20=1 uv run python scripts/sqlalchemy_echo_demo.py
+    uv run scripts/ap3_sqlalchemy_echo.py
 
 Mirrors exactly what `/demo/ap3/bad-n1` and `/demo/ap3/good` do, but runs
 directly against the DB (own engine, echo=True) so every SQL statement is
@@ -9,17 +9,16 @@ printed and counted without HTTP/log noise in between.
 """
 
 import asyncio
-import os
 
+import _common
 from sqlalchemy import event, select
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import selectinload
 
-from app.config import get_settings
 from app.db import build_sessionmaker
 from app.models import Order
 
-DATABASE_URL = os.environ.get("DATABASE_URL") or get_settings().database_url
+DATABASE_URL = _common.database_url()
 LIMIT = 5
 
 

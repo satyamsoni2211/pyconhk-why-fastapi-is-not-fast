@@ -14,14 +14,14 @@ Endpoints: `GET /demo/ap1/bad` (`requests.get()` inside `async def`),
 | `bridge` | **1.039s** | Concurrent — `run_in_executor` frees the loop too |
 
 Full output: [`latency-3-concurrent.txt`](latency-3-concurrent.txt)
-Reproduce: `docker compose up -d && ./scripts/profile_pyspy.sh bad` (see script for the raw curl loop)
+Reproduce: `docker compose up -d && ./scripts/ap1_pyspy_flamegraph.sh bad` (see script for the raw curl loop)
 
 ## asyncio debug-mode slow-callback warning
 
-Captured via `PYTHONASYNCIODEBUG=1 uv run python scripts/asyncio_debug_demo.py`:
+Captured via `PYTHONASYNCIODEBUG=1 uv run python scripts/ap1_asyncio_debug.py`:
 
 ```
-WARNING:asyncio:Executing <Task ...> took 1.056 seconds
+WARNING:asyncio: Executing <Task name='bad_blocking_call' ...> took 1.022 seconds
 ```
 
 — logged only for the `bad` path. The `good` (httpx.AsyncClient) path produces
@@ -33,7 +33,7 @@ Full output: [`asyncio-debug.log`](asyncio-debug.log)
 [`flamegraph-bad.svg`](flamegraph-bad.svg) / [`flamegraph-good.svg`](flamegraph-good.svg)
 — captured with `py-spy record --pid 1 --duration 5 --rate 200` against the
 dockerized app process while firing concurrent requests at each endpoint.
-Reproduce: `./scripts/profile_pyspy.sh <bad|good> <output.svg>`
+Reproduce: `./scripts/ap1_pyspy_flamegraph.sh <bad|good> <output.svg>`
 
 ## Automated regression test
 

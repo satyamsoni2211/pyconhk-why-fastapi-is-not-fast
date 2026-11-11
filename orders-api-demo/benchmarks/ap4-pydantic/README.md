@@ -17,7 +17,7 @@ directly from the ORM object).
 extra per-field validator chain running twice.
 
 Full pstats output: [`cprofile-bad.txt`](cprofile-bad.txt) / [`cprofile-good.txt`](cprofile-good.txt)
-Reproduce: `PYTHONPATH=. uv run python scripts/pydantic_cprofile_demo.py`
+Reproduce: `PYTHONPATH=. uv run python scripts/ap4_pydantic_cprofile.py`
 
 ## Real single-request HTTP timing, 200 orders
 

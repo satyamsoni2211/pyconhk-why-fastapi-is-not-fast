@@ -100,11 +100,11 @@ time (for i in 1 2 3; do curl -s -o /dev/null localhost:8000/demo/ap1/bridge & d
 - **Health check during the block** (most dramatic): in one terminal fire `curl localhost:8000/demo/ap1/bad`, and immediately in another run `curl localhost:8000/health`. The trivial health check hangs until the bad call finishes. Repeat with `/good` — health answers instantly.
 - **asyncio debug mode** (no app needed, only the gateway):
   ```bash
-  PYTHONASYNCIODEBUG=1 uv run python scripts/asyncio_debug_demo.py
+  PYTHONASYNCIODEBUG=1 uv run python scripts/ap1_asyncio_debug.py
   ```
   Prints `Executing <Task …> took 1.0xx seconds` for the BAD call and nothing for the GOOD one.
 - **py-spy flame graph** (Docker only — the script uses `docker compose exec`):
-  `./scripts/profile_pyspy.sh bad flamegraph-bad.svg`. Pre-captured graphs are in
+  `./scripts/ap1_pyspy_flamegraph.sh bad flamegraph-bad.svg`. Pre-captured graphs are in
   [`benchmarks/ap1-blocking/`](benchmarks/ap1-blocking/) and `talk/assets/` — open the SVGs instead if not on Docker.
 
 ### Talking points
@@ -132,7 +132,7 @@ lifespan, not inside a `Depends` that runs on every request.
 curl localhost:8000/demo/ap2/bad     # {"mode":"bad-new-engine-and-client-per-request","elapsed_seconds":…}
 curl localhost:8000/demo/ap2/good
 
-BASE_URL=http://localhost:8000 uv run python scripts/bench_ap2_di.py   # 50 requests each, mean/p50/p95
+BASE_URL=http://localhost:8000 uv run python scripts/ap2_di_benchmark.py   # 50 requests each, mean/p50/p95
 ```
 
 **Expected (SQLite, local):** bad ≈ 5–6 ms vs good ≈ 1.3 ms mean (~4x).
@@ -169,7 +169,7 @@ curl "localhost:8000/demo/ap3/good?limit=5"           # same item_counts as bad-
 ### Make it visible — count the queries
 
 ```bash
-PYTHONPATH=. uv run python scripts/sqlalchemy_echo_demo.py
+PYTHONPATH=. uv run python scripts/ap3_sqlalchemy_echo.py
 ```
 
 Prints every SQL statement (`echo=True`) and ends with
@@ -203,7 +203,7 @@ roughly **2–2.7x** slower (e.g. 5.8 ms vs 2.9 ms at 500 orders).
 ### Make it visible — function-call counts
 
 ```bash
-PYTHONPATH=. uv run python scripts/pydantic_cprofile_demo.py
+PYTHONPATH=. uv run python scripts/ap4_pydantic_cprofile.py
 ```
 
 Shows cProfile output for both: ~290k function calls (bad) vs ~111k (good), ≈ **2.6x** more
@@ -239,13 +239,13 @@ process start, so the demo **restarts the app** between runs instead of using a 
 POOL_MODE=bad uv run uvicorn app.main:app --port 8000
 curl localhost:8000/demo/ap5/info          # confirm "pool_mode":"bad"
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
-  --csv benchmarks/ap5-pool/locust-bad -f scripts/locustfile.py
+  --csv benchmarks/ap5-pool/locust-bad -f scripts/ap5_locustfile.py
 
 # stop the app (Ctrl-C), then --- GOOD ---
 POOL_MODE=good uv run uvicorn app.main:app --port 8000
 curl localhost:8000/demo/ap5/info          # confirm "pool_mode":"good"
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
-  --csv benchmarks/ap5-pool/locust-good -f scripts/locustfile.py
+  --csv benchmarks/ap5-pool/locust-good -f scripts/ap5_locustfile.py
 ```
 
 (The `--csv` flags overwrite the captured Postgres results in `benchmarks/ap5-pool/`; drop
@@ -254,7 +254,7 @@ them or point at another prefix like `/tmp/locust-bad` if you want to keep those
 **Expected (SQLite, 100 users, 15 s):** bad ≈ **40–45 % failures**, ~43 req/s; good **0 %**, ~97 req/s.
 **Captured (Postgres):** 2.1 % failures @ 47.8 req/s vs 0 % @ 179.3 req/s.
 
-Interactive alternative: `uv run locust -f scripts/locustfile.py --host http://localhost:8000`
+Interactive alternative: `uv run locust -f scripts/ap5_locustfile.py --host http://localhost:8000`
 and open <http://localhost:8089> for live charts — good for a projector.
 
 In the bad run the app log shows:
@@ -289,7 +289,7 @@ above so it overrides it.
 |---|---|---|
 | 0–2 | Baseline | Section 1; show `/docs` |
 | 2–6 | AP1 | 3× concurrent bad vs good; health-check-hangs trick; asyncio debug output |
-| 6–9 | AP2 | `bench_ap2_di.py`; mention Postgres is ~10x |
+| 6–9 | AP2 | `ap2_di_benchmark.py`; mention Postgres is ~10x |
 | 9–13 | AP3 | Show the 500, then query counts script |
 | 13–16 | AP4 | `curl` both, then cProfile call counts |
 | 16–19 | AP5 | Restart in `bad`, locust, restart in `good`, locust; show timeout traceback |
@@ -311,6 +311,6 @@ docker compose exec app uv run python scripts/seed_data.py
 POOL_MODE=bad docker compose up -d app    # AP5: recreate the app with a different pool mode
 ```
 
-Use this mode for AP2's ~10x gap, the py-spy flame graphs (`scripts/profile_pyspy.sh`), and
+Use this mode for AP2's ~10x gap, the py-spy flame graphs (`scripts/ap1_pyspy_flamegraph.sh`), and
 the Postgres AP5 numbers. The scripts under `scripts/` use `DATABASE_URL` if set, otherwise the app's configured database; from the host
 use `DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders"`.
