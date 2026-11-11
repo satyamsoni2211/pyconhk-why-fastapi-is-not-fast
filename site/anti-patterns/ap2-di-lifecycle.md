@@ -74,7 +74,15 @@ The fix is the pattern from the talk: create once in the lifespan, store on `app
 
 ## Try it
 
+Run from `orders-api-demo/`. The `make` tab wraps the same endpoints and scripts (`make` on its own lists every target).
+
 ::: code-group
+
+```bash [make]
+make ap2          # bad and good, 20 requests each, server-side time
+make ap2-bad      # one endpoint: ap2-bad or ap2-good
+make ap2-bench    # scripts/ap2_di_benchmark.py: 50 requests each, mean/p50/p95
+```
 
 ```bash [single requests]
 curl localhost:8000/demo/ap2/bad     # {"mode":"bad-new-engine-and-client-per-request","elapsed_seconds":...}
@@ -82,7 +90,7 @@ curl localhost:8000/demo/ap2/good
 ```
 
 ```bash [benchmark, 50 each]
-BASE_URL=http://localhost:8000 uv run python scripts/ap2_di_benchmark.py
+uv run scripts/ap2_di_benchmark.py
 ```
 
 :::

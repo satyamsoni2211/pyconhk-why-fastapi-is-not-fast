@@ -14,14 +14,14 @@ Most failures come from one of three things: the gateway hostname in `.env`, the
 | Symptom | Cause | Fix |
 |---|---|---|
 | Every `/demo/ap1/*` and `/demo/ap2/*` call returns 500 with `nodename nor servname provided` | `.env` has `PAYMENT_GATEWAY_URL=http://payment-gateway:8080`, the Docker hostname | For local runs set `PAYMENT_GATEWAY_URL=http://localhost:8080`, either in `.env` or on the command. Environment variables beat `.env`. |
-| `/demo/ap5/info` shows `pool_mode: bad` when you wanted `good`, or the reverse | `.env` contains `POOL_MODE`, which is read at process start | Set it on the command, for example `POOL_MODE=good uv run uvicorn …`, then confirm with `/demo/ap5/info` |
+| `/demo/ap5/info` shows `pool_mode: bad` when you wanted `good`, or the reverse | `.env` contains `POOL_MODE`, which is read at process start | Set it on the command, for example `make run POOL_MODE=good` (or `make ap5-good` with Docker), then confirm with `make ap5-info` |
 | `Address already in use`, or strange 404s on `:8000` | Another process owns the port | `lsof -nP -iTCP:8000 -sTCP:LISTEN`, or use another port and change the URLs |
 | `.env` has `DATABASE_URL` pointing at `db:5432` | Docker configuration | Comment it out for SQLite. The default is `db/orders.db`. |
 | Locust reports failures on `good` | Pool still on `bad`, or the app was not restarted | Restart with `POOL_MODE=good`, confirm with `/demo/ap5/info`, and run again |
-| `pytest` cannot reach the gateway | `PAYMENT_GATEWAY_URL` still points at the Docker hostname | `PAYMENT_GATEWAY_URL=http://localhost:8080 uv run pytest tests/ -v` |
+| `pytest` cannot reach the gateway | `PAYMENT_GATEWAY_URL` still points at the Docker hostname | `make test`, or `PAYMENT_GATEWAY_URL=http://localhost:8080 uv run pytest tests/ -v` |
 
 ::: tip Check before every rehearsal
-Two commands catch most problems. `curl localhost:8000/health` should return `{"status":"ok"}`, and `curl localhost:8000/demo/ap5/info` should show the pool mode you expect.
+Two commands catch most problems. `make health` should report the app and gateway as ok, and `make ap5-info` should show the pool mode you expect.
 :::
 
 ## If something breaks on stage

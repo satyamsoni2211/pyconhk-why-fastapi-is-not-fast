@@ -58,14 +58,17 @@ cd orders-api-demo
 cp .env.example .env
 docker compose up -d        # postgres + mock payment gateway + app
 uv sync
-DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders" \
-  uv run python scripts/seed_data.py
+uv run scripts/seed_data.py
 curl http://localhost:8000/health
 ```
+
+Or the same with the Makefile: `make up && make install && make seed`. Run `make` to list every target.
 
 Then feel AP1 for yourself:
 
 ```bash
+make ap1   # bad, good and bridge side by side
+# or by hand:
 time (for i in 1 2 3; do curl -s -o /dev/null http://localhost:8000/demo/ap1/bad & done; wait)   # ~3.0s
 time (for i in 1 2 3; do curl -s -o /dev/null http://localhost:8000/demo/ap1/good & done; wait)  # ~1.0s
 ```
@@ -73,7 +76,7 @@ time (for i in 1 2 3; do curl -s -o /dev/null http://localhost:8000/demo/ap1/goo
 …and watch AP3 crash for real:
 
 ```bash
-curl "http://localhost:8000/demo/ap3/bad-crash?limit=3"   # MissingGreenlet
+make ap3-bad-crash   # or: curl "http://localhost:8000/demo/ap3/bad-crash?limit=3"
 ```
 
 The README's "Reproducing every benchmark from scratch" section has the
@@ -97,7 +100,8 @@ app/
   routers/
     orders.py        Baseline endpoints, written correctly — the reference
     demo_ap1..ap5.py One router per anti-pattern, bad/good pairs side by side
-scripts/             Seeding + every profiling/benchmark script (one per AP)
+scripts/             Seeding, every profiling/benchmark script (apN_*), demo_endpoints.py
+Makefile             One target per demo step (`make` lists them)
 benchmarks/          One folder per AP: real captured output + explanatory README
 tests/               pytest suite — asserts each anti-pattern's behavior numerically
 ```

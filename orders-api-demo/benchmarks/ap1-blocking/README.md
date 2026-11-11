@@ -18,7 +18,7 @@ Reproduce: `docker compose up -d && ./scripts/ap1_pyspy_flamegraph.sh bad` (see 
 
 ## asyncio debug-mode slow-callback warning
 
-Captured via `PYTHONASYNCIODEBUG=1 uv run python scripts/ap1_asyncio_debug.py`:
+Captured via `uv run scripts/ap1_asyncio_debug.py` (`make ap1-debug`):
 
 ```
 WARNING:asyncio: Executing <Task name='bad_blocking_call' ...> took 1.022 seconds
@@ -33,7 +33,7 @@ Full output: [`asyncio-debug.log`](asyncio-debug.log)
 [`flamegraph-bad.svg`](flamegraph-bad.svg) / [`flamegraph-good.svg`](flamegraph-good.svg)
 — captured with `py-spy record --pid 1 --duration 5 --rate 200` against the
 dockerized app process while firing concurrent requests at each endpoint.
-Reproduce: `./scripts/ap1_pyspy_flamegraph.sh <bad|good> <output.svg>`
+Reproduce: `./scripts/ap1_pyspy_flamegraph.sh <bad|good> <output.svg>` (or `make ap1-flamegraph MODE=<bad|good>`)
 
 ## Automated regression test
 

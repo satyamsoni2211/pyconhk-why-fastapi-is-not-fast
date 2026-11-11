@@ -14,7 +14,7 @@ mean overhead: 15.74ms per request  (~10x)
 ```
 
 Full output: [`latency-report.txt`](latency-report.txt)
-Reproduce: `docker compose up -d && uv run python scripts/ap2_di_benchmark.py`
+Reproduce: `make up && make ap2-bench` (or `docker compose up -d && uv run scripts/ap2_di_benchmark.py`)
 
 That ~16ms is almost entirely the fresh asyncpg connection handshake +
 Postgres auth the "bad" path pays on every single request — at any real

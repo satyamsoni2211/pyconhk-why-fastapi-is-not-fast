@@ -74,7 +74,15 @@ For data that never crosses a process boundary, the file also includes `internal
 
 ## Try it
 
+Run from `orders-api-demo/`. The `make` tab wraps the same endpoints and scripts (`make` on its own lists every target).
+
 ::: code-group
+
+```bash [make]
+make ap4            # bad and good transform time at 500 orders
+make ap4-bad        # one endpoint: ap4-bad or ap4-good
+make ap4-profile    # scripts/ap4_pydantic_cprofile.py: function-call counts
+```
 
 ```bash [endpoints]
 curl "localhost:8000/demo/ap4/bad?limit=500"
@@ -82,14 +90,14 @@ curl "localhost:8000/demo/ap4/good?limit=500"
 ```
 
 ```bash [function calls]
-PYTHONPATH=. uv run python scripts/ap4_pydantic_cprofile.py
+uv run scripts/ap4_pydantic_cprofile.py
 ```
 
 :::
 
 Compare `elapsed_seconds`. Only the transform is timed, not the database fetch. **Expected, local SQLite** (DEMO_GUIDE): `bad` is roughly 2 to 2.7× slower than `good`, for example 5.8 ms against 2.9 ms at 500 orders.
 
-The cProfile script prints the function-call counts. **Expected, local SQLite:** about 290k calls for `bad` and 111k for `good`.
+The cProfile script prints the function-call counts, and rewrites `benchmarks/ap4-pydantic/cprofile-*.txt` (`git checkout benchmarks/ap4-pydantic` restores the committed capture). **Expected, local SQLite:** about 290k calls for `bad` and 111k for `good`.
 
 Live, the time difference is only milliseconds, so it will not read on a projector. Show the captured numbers instead, and use the endpoints if you want a live moment.
 

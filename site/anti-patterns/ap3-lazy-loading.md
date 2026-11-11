@@ -86,7 +86,15 @@ async def eager_load_selectinload(session: SessionDep, limit: int = 5):
 
 ## Try it
 
+Run from `orders-api-demo/`. The `make` tab wraps the same endpoints and scripts (`make` on its own lists every target).
+
 ::: code-group
+
+```bash [make]
+make ap3              # bad-crash, bad-n1 and good, with item_counts
+make ap3-bad-crash    # one endpoint: ap3-bad-crash, ap3-bad-n1 or ap3-good
+make ap3-echo         # scripts/ap3_sqlalchemy_echo.py: print and count every query
+```
 
 ```bash [crash]
 curl -i "localhost:8000/demo/ap3/bad-crash?limit=3"
@@ -98,7 +106,7 @@ curl "localhost:8000/demo/ap3/good?limit=5"
 ```
 
 ```bash [count the queries]
-PYTHONPATH=. uv run python scripts/ap3_sqlalchemy_echo.py
+uv run scripts/ap3_sqlalchemy_echo.py
 ```
 
 :::

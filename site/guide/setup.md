@@ -22,15 +22,29 @@ You will run two processes: the **payment gateway** stand-in, and the **Orders A
 
 The SQLite gap is smaller because a new SQLite engine has no network handshake. See [Benchmarks](/reference/benchmarks) for the full explanation.
 
+::: tip The Makefile
+`orders-api-demo/Makefile` has a target for every step on this site. Run `make` to list them. It picks the mode from `.env`: Docker when `DATABASE_URL` points at the `db` host, otherwise local SQLite.
+:::
+
 ## Mode 1: SQLite, no Docker
 
 Run these from `orders-api-demo/`. You need [uv](https://docs.astral.sh/uv/).
 
-```bash
+::: code-group
+
+```bash [make]
+cd orders-api-demo
+make install
+make seed        # creates db/orders.db
+```
+
+```bash [uv]
 cd orders-api-demo
 uv sync
-uv run python scripts/seed_data.py     # creates db/orders.db
+uv run scripts/seed_data.py     # creates db/orders.db
 ```
+
+:::
 
 Seeding is idempotent. It prints "Data already seeded, skipping" on a second run. Delete `db/orders.db` to reseed. The seed creates 200 customers, 2000 orders, and about 6000 order items.
 
@@ -39,16 +53,18 @@ Start the two services in two terminals:
 ::: code-group
 
 ```bash [Terminal 1: gateway]
-uv run uvicorn mock_gateway.main:app --port 8080
+make gateway
+# or: uv run uvicorn mock_gateway.main:app --port 8080
 ```
 
 ```bash [Terminal 2: Orders API]
-uv run uvicorn app.main:app --port 8000
+make run         # POOL_MODE=bad for the AP5 bad profile
+# or: uv run uvicorn app.main:app --port 8000
 ```
 
 :::
 
-Check both services:
+Check both services with `make health`, or:
 
 ```bash
 curl localhost:8000/health    # {"status":"ok"}
@@ -65,18 +81,28 @@ Expected output:
 
 This mode matches the captured Postgres numbers. Docker and [uv](https://docs.astral.sh/uv/) are required.
 
-```bash
+::: code-group
+
+```bash [make]
+cd orders-api-demo
+make up          # copies .env.example to .env if missing, starts the stack, waits for the app
+make install     # local venv for running scripts and tests on the host
+make seed        # seeds Postgres through localhost:5432
+make health
+```
+
+```bash [docker + uv]
 cd orders-api-demo
 cp .env.example .env
 docker compose up -d          # postgres:16, go-httpbin gateway, and the app
 uv sync                       # local venv for running scripts and tests on the host
-
-DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders" \
-  uv run python scripts/seed_data.py
+uv run scripts/seed_data.py   # swaps the db hostname for localhost on the host
 
 curl http://localhost:8000/health
 curl "http://localhost:8000/orders?limit=5"
 ```
+
+:::
 
 The compose file starts three services:
 
@@ -89,7 +115,7 @@ The compose file starts three services:
 Interactive API docs are at `http://localhost:8000/docs` once the app is running.
 
 ::: warning Docker-only commands
-`scripts/ap1_pyspy_flamegraph.sh` runs `docker compose exec`, so it only works in this mode. The flame graphs in `benchmarks/` were produced this way.
+`scripts/ap1_pyspy_flamegraph.sh` (`make ap1-flamegraph`) runs `docker compose exec`, so it only works in this mode. The flame graphs in `benchmarks/` were produced this way.
 :::
 
 ## Configuration
@@ -155,15 +181,17 @@ Stop that process, or run uvicorn on another port and adjust the URLs.
 Run the automated tests. They start the mock gateway themselves if nothing is listening on `PAYMENT_GATEWAY_URL`.
 
 ```bash
-PAYMENT_GATEWAY_URL=http://localhost:8080 uv run pytest tests/ -v
+make test
+# or: PAYMENT_GATEWAY_URL=http://localhost:8080 uv run pytest tests/ -v
 ```
 
-Expected: **13 passed** (about 5 seconds). If your `.env` still has the Docker hostname, the export above overrides it.
+Expected: **13 passed** (about 5 seconds). With a Docker `.env`, `make test` also points `DATABASE_URL` at `localhost:5432`.
 
 Then run the first demo:
 
 ```bash
-time (for i in 1 2 3; do curl -s -o /dev/null localhost:8000/demo/ap1/bad & done; wait)
+make ap1-bad
+# or: time (for i in 1 2 3; do curl -s -o /dev/null localhost:8000/demo/ap1/bad & done; wait)
 ```
 
 Expected: about **3.0 s** in the SQLite mode with the local gateway. The [AP1 page](/anti-patterns/ap1-blocking-event-loop) shows the captured Postgres run.

@@ -201,7 +201,7 @@ done; wait)
 <section data-background-image="/slides/img/bg-content.png" data-background-size="cover">
   <h2>asyncio snitches on you — for free</h2>
   <div class="badcode" style="margin-top:24px">
-<pre><code class="language-bash xs" data-trim data-fragment-index="1" data-line-numbers="|2">$ PYTHONASYNCIODEBUG=1 uv run python scripts/ap1_asyncio_debug.py
+<pre><code class="language-bash xs" data-trim data-fragment-index="1" data-line-numbers="|2">$ PYTHONASYNCIODEBUG=1 uv run scripts/ap1_asyncio_debug.py
 WARNING:asyncio: Executing &lt;Task name='bad_blocking_call' ...&gt; took 1.022 seconds</code></pre></div>
   <div class="card" style="margin-top:34px">
     <p class="big-line fragment pop" data-fragment-index="1" style="font-size:32px"><strong>Only</strong> the blocking path gets flagged.</p>

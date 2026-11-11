@@ -32,6 +32,7 @@ This repo wraps it for the Docker app container. The script fires concurrent req
 ```bash
 ./scripts/ap1_pyspy_flamegraph.sh bad flamegraph-bad.svg
 ./scripts/ap1_pyspy_flamegraph.sh good flamegraph-good.svg
+make ap1-flamegraph MODE=bad     # same, through the Makefile
 ```
 
 The script takes `<bad|good|bridge>`, an output name, and an optional concurrency (default 3). It needs Docker because it uses `docker compose exec`. The captured graphs are in `benchmarks/ap1-blocking/` and `talk/assets/`.
@@ -45,7 +46,8 @@ A wide block near the top of a stack is where time was spent. For AP1 you are lo
 Run with `PYTHONASYNCIODEBUG=1`. asyncio logs any task that holds the loop longer than its slow-callback threshold. It names the task and prints the time taken, which is the simplest way to find a blocking call.
 
 ```bash
-PYTHONASYNCIODEBUG=1 uv run python scripts/ap1_asyncio_debug.py
+PYTHONASYNCIODEBUG=1 uv run scripts/ap1_asyncio_debug.py
+make ap1-debug                    # same, through the Makefile
 ```
 
 The script calls the gateway through both the bad and the good path. The bad path produces the warning and the good path does not.
@@ -67,7 +69,8 @@ python -m cProfile -o out.prof script.py
 This repo's script profiles the AP4 transforms over real seeded orders:
 
 ```bash
-PYTHONPATH=. uv run python scripts/ap4_pydantic_cprofile.py
+uv run scripts/ap4_pydantic_cprofile.py
+make ap4-profile                  # same, through the Makefile
 ```
 
 To read a saved profile:
@@ -87,7 +90,8 @@ create_async_engine(url, echo=True)
 This repo's script runs the AP3 bad and good paths against the same data and prints the counts:
 
 ```bash
-SQLALCHEMY_WARN_20=1 PYTHONPATH=. uv run python scripts/ap3_sqlalchemy_echo.py
+uv run scripts/ap3_sqlalchemy_echo.py
+make ap3-echo                     # same, through the Makefile
 ```
 
 The log is verbose. Use it to count, not to present live. In a test, a `before_cursor_execute` listener counts queries without printing them. The repo's AP3 test does this.
@@ -100,12 +104,14 @@ A load-testing tool written in Python. It drives many concurrent users against t
 locust --headless -u 50 -r 10 -t 30s \
   --host http://localhost:8000 \
   --csv my-run -f scripts/ap5_locustfile.py
+
+make ap5-load                     # same, 100 users for 20 s
 ```
 
-The repo's `scripts/ap5_locustfile.py` targets `/demo/ap5/query`. The `--csv` prefix writes stats, stats history, failures, and exceptions files. For interactive runs, omit `--headless` and open the web UI on port 8089.
+The repo's `scripts/ap5_locustfile.py` targets `/demo/ap5/query`. The `--csv` prefix writes stats, stats history, failures, and exceptions files. For interactive runs, omit `--headless` (or run `make ap5-ui`) and open the web UI on port 8089.
 
 ::: info Restart between pool profiles
-The AP5 pool is fixed when the process starts. Restart the app with `POOL_MODE=bad` and then `POOL_MODE=good`, running locust against each. See [AP5](/anti-patterns/ap5-pool-starvation).
+The AP5 pool is fixed when the process starts. Restart the app with `POOL_MODE=bad` and then `POOL_MODE=good`, running locust against each. With Docker, `make ap5-bad` and `make ap5-good` do the restart. See [AP5](/anti-patterns/ap5-pool-starvation).
 :::
 
 ## Seeding the database
@@ -113,7 +119,8 @@ The AP5 pool is fixed when the process starts. Restart the app with `POOL_MODE=b
 The profiling scripts need data. `scripts/seed_data.py` creates 200 customers, 2000 orders, and about 6000 order items. It is idempotent.
 
 ```bash
-uv run python scripts/seed_data.py
+make seed
+# or: uv run scripts/seed_data.py
 ```
 
 ## Related

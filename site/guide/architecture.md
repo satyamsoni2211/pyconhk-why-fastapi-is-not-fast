@@ -45,7 +45,8 @@ orders-api-demo/
       demo_ap4.py      Redundant round-trip vs from_attributes
       demo_ap5.py      Slow query and pool info
   mock_gateway/main.py Stand-in for the payment gateway
-  scripts/             Seeding, benchmarks, profilers, and locust
+  scripts/             Seeding, benchmarks, profilers, locust, and demo_endpoints.py
+  Makefile             One target per demo step; run `make` to list them
   tests/               One pytest file per anti-pattern, plus baseline tests
   benchmarks/          Captured output and an explanatory README per pattern
 ```

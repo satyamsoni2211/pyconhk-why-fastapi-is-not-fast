@@ -100,9 +100,25 @@ The fix is to size the pool for real concurrency, choose `pool_timeout` on purpo
 
 ## Try it
 
-Restart the app between the two runs. The pool is fixed at process start. Use a scratch prefix for `--csv` so you do not overwrite the committed captures in `benchmarks/ap5-pool/`.
+Restart the app between the two runs. The pool is fixed at process start. Use a scratch prefix for `--csv` so you do not overwrite the committed captures in `benchmarks/ap5-pool/`. With Docker, the `make` targets do the restart for you.
 
 ::: code-group
+
+```bash [make (Docker)]
+make ap5-bad      # restart with the small pool, then fire 200 requests at once
+make ap5-load     # locust, 100 users for 20 s, CSV prefix my-run-bad
+make ap5-good     # restart with the large pool, same burst
+make ap5-load     # locust again, CSV prefix my-run-good
+make ap5-ui       # or: locust web UI on http://localhost:8089
+```
+
+```bash [make (local)]
+make run POOL_MODE=bad     # restart the app yourself between runs
+make ap5 && make ap5-load
+# Ctrl-C the app, then:
+make run POOL_MODE=good
+make ap5 && make ap5-load
+```
 
 ```bash [bad profile]
 POOL_MODE=bad uv run uvicorn app.main:app --port 8000
@@ -138,7 +154,7 @@ sqlalchemy.exc.TimeoutError: QueuePool limit of size 5 overflow 10 reached, conn
 The DEMO_GUIDE gives these expected values for SQLite, not captured runs: the bad profile fails about 40 to 45 percent of requests at about 43 req/s, and the good profile has 0 percent failures at about 97 req/s.
 
 ::: danger Reset the pool after rehearsal
-A rehearsal can leave `POOL_MODE=bad` active. Before the talk, run `POOL_MODE=good docker compose up -d app` and confirm `/demo/ap5/info`.
+A rehearsal can leave `POOL_MODE=bad` active. Before the talk, run `make ap5-good` (or `POOL_MODE=good docker compose up -d app`) and confirm with `make ap5-info`.
 :::
 
 ## Pool profiles

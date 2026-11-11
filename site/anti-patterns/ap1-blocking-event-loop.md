@@ -69,9 +69,14 @@ The `bridge` route keeps `requests` but moves it into `run_in_executor`. It is a
 
 ## Try it
 
-Run these with the Orders API and the gateway running. See [Setup](/guide/setup).
+Run these from `orders-api-demo/` with the Orders API and the gateway running. See [Setup](/guide/setup). The `make` tab runs the same calls through `scripts/demo_endpoints.py` and prints the timings side by side.
 
 ::: code-group
+
+```bash [make]
+make ap1          # bad, good and bridge, 3 concurrent each, plus a /health probe
+make ap1-bad      # one endpoint: ap1-bad, ap1-good or ap1-bridge
+```
 
 ```bash [bad]
 time (for i in 1 2 3; do curl -s -o /dev/null localhost:8000/demo/ap1/bad & done; wait)
@@ -89,7 +94,7 @@ time (for i in 1 2 3; do curl -s -o /dev/null localhost:8000/demo/ap1/bridge & d
 
 **Expected** (Postgres capture, Docker gateway): `bad` about **3.0 s**, `good` about **1.0 s**, `bridge` about **1.0 s**.
 
-For the most dramatic version, run `curl localhost:8000/demo/ap1/bad` in one terminal and `curl localhost:8000/health` in another right after. The health check waits until the bad call finishes. Repeat with `/good` and it answers at once.
+For the most dramatic version, run `curl localhost:8000/demo/ap1/bad` in one terminal and `curl localhost:8000/health` in another right after. The health check waits until the bad call finishes. Repeat with `/good` and it answers at once. `make ap1` measures this for you in its `/health answered in` column.
 
 ## Measured evidence
 
@@ -111,10 +116,10 @@ real: 3.046s total   (~1s x 3, fully serialized — the event loop is blocked
 real: 1.040s total   (~1s total — all 3 requests run concurrently)
 ```
 
-asyncio's debug mode also flags the blocking call (`benchmarks/ap1-blocking/asyncio-debug.log`):
+asyncio's debug mode also flags the blocking call, and names the task (`benchmarks/ap1-blocking/asyncio-debug.log`). Run it with `make ap1-debug`:
 
 ```text
-WARNING:asyncio:Executing <Task ...> took 1.056 seconds
+WARNING:asyncio: Executing <Task name='bad_blocking_call' ...> took 1.022 seconds
 ```
 
 The `good` path produces no such warning.

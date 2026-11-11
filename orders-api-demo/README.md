@@ -24,15 +24,21 @@ cp .env.example .env
 
 docker compose up -d          # postgres + mock payment gateway + app
 uv sync                       # local venv, for running scripts/tests on the host
-
-DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders" \
-  uv run python scripts/seed_data.py
+uv run scripts/seed_data.py   # swaps the db hostname for localhost on the host
 
 curl http://localhost:8000/health
 curl http://localhost:8000/orders?limit=5
 ```
 
 Interactive API docs: http://localhost:8000/docs
+
+Or with the [`Makefile`](Makefile) (`make` lists every target):
+
+```bash
+make up && make install && make seed
+make demos        # every anti-pattern's endpoints, bad vs good
+make ap1-bad      # or a single endpoint
+```
 
 ### Without Docker (SQLite + bundled mock payment gateway)
 
@@ -42,9 +48,9 @@ The default `DATABASE_URL` is a local SQLite file (`db/orders.db`), and
 
 ```bash
 uv sync
-uv run python scripts/seed_data.py                       # creates db/orders.db
-uv run uvicorn mock_gateway.main:app --port 8080          # terminal 1: payment gateway
-uv run uvicorn app.main:app --port 8000                   # terminal 2: Orders API
+uv run scripts/seed_data.py                               # creates db/orders.db  (make seed)
+uv run uvicorn mock_gateway.main:app --port 8080          # terminal 1: payment gateway  (make gateway)
+uv run uvicorn app.main:app --port 8000                   # terminal 2: Orders API  (make run)
 ```
 
 `PAYMENT_GATEWAY_URL` defaults to `http://localhost:8080`. `pytest` starts the
@@ -94,29 +100,27 @@ curl "http://localhost:8000/demo/ap3/bad-crash?limit=3"
 
 ## Reproducing every benchmark from scratch
 
+Each line has a `make` equivalent in the comment.
+
 ```bash
-docker compose up -d
-uv sync
+docker compose up -d                                       # make up
+uv sync                                                    # make install
 
 # AP1 — py-spy flame graphs + asyncio debug-mode warning
-./scripts/ap1_pyspy_flamegraph.sh bad flamegraph-bad.svg
-./scripts/ap1_pyspy_flamegraph.sh good flamegraph-good.svg
-PAYMENT_GATEWAY_URL="http://localhost:8080" PYTHONASYNCIODEBUG=1 \
-  uv run python scripts/ap1_asyncio_debug.py
+./scripts/ap1_pyspy_flamegraph.sh bad flamegraph-bad.svg   # make ap1-flamegraph MODE=bad
+./scripts/ap1_pyspy_flamegraph.sh good flamegraph-good.svg # make ap1-flamegraph MODE=good
+uv run scripts/ap1_asyncio_debug.py                        # make ap1-debug
 
 # AP2 — DI lifecycle latency
-uv run python scripts/ap2_di_benchmark.py
+uv run scripts/ap2_di_benchmark.py                         # make ap2-bench
 
 # AP3 — SQL echo + query counts
-SQLALCHEMY_WARN_20=1 PYTHONPATH=. \
-  DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders" \
-  uv run python scripts/ap3_sqlalchemy_echo.py
+uv run scripts/ap3_sqlalchemy_echo.py                      # make ap3-echo
 
 # AP4 — cProfile
-PYTHONPATH=. DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders" \
-  uv run python scripts/ap4_pydantic_cprofile.py
+uv run scripts/ap4_pydantic_cprofile.py                    # make ap4-profile
 
-# AP5 — locust, bad config then good config
+# AP5 — locust, bad config then good config (make ap5-bad / make ap5-good restart the app)
 POOL_MODE=bad docker compose up -d app
 uv run locust --headless -u 100 -r 100 -t 20s --host http://localhost:8000 \
   --csv benchmarks/ap5-pool/locust-bad -f scripts/ap5_locustfile.py
@@ -133,6 +137,8 @@ same behavior numerically on every run (not just a one-off capture):
 
 ```bash
 docker compose up -d db payment-gateway
+make test
+# or:
 DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders" \
 PAYMENT_GATEWAY_URL="http://localhost:8080" \
   uv run pytest tests/ -v
@@ -153,7 +159,8 @@ app/
     orders.py            Baseline create/list/detail endpoints
     demo_ap1.py..demo_ap5.py   One router per anti-pattern
 mock_gateway/              Mock payment gateway (FastAPI) used instead of go-httpbin when not on Docker
-scripts/                  Seeding + every profiling/benchmark script
+scripts/                  Seeding, every profiling/benchmark script, demo_endpoints.py
+Makefile                  One target per demo step (`make` lists them)
 benchmarks/                One folder per anti-pattern with real captured output + README
 tests/                      pytest suite, one file per anti-pattern
 ```

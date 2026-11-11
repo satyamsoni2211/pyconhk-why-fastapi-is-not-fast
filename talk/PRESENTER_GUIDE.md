@@ -17,9 +17,9 @@ Do this the night before AND again ~30 minutes before the slot.
       connection, standard projector, no special room setup needed.
 - [ ] `cd orders-api-demo && docker compose down -v && docker compose up -d`
       — fresh containers, no leftover state from testing.
-- [ ] `DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders" uv run python scripts/seed_data.py`
-- [ ] Confirm `POOL_MODE=good` is currently running (`curl localhost:8000/demo/ap5/info`) — you'll switch to `bad` live for AP5 and must switch back after, or before if you demo AP5 out of order.
-- [ ] `curl http://localhost:8000/health` → `{"status":"ok"}`
+- [ ] `make seed` (or `uv run scripts/seed_data.py`)
+- [ ] Confirm `POOL_MODE=good` is currently running (`make ap5-info`) — you'll switch to `bad` live for AP5 and must switch back after, or before if you demo AP5 out of order.
+- [ ] `make health` → app ok, gateway ok
 - [ ] Terminal font size bumped up (readable from the back of the room). Two terminal tabs ready: one for the app/curl commands, one held in reserve for `docker compose logs app -f` if you want to show a live traceback.
 - [ ] Slides open in presenter mode if your setup supports it; otherwise `talk/slides.pdf` open and tested for full-screen.
 - [ ] Wi-Fi/network: everything runs on `localhost` — confirm you do **not** need conference Wi-Fi for the demo itself (only for showing the GitHub repo URL, which can also just be a slide).
@@ -68,7 +68,7 @@ so at an `await`. Everything today lives inside that one sentence.
 - Show the bad dependency code (new engine per request).
 - State the number cold: "17.5 milliseconds average, versus 1.7. Ten
   times, just from rebuilding a connection pool you already had."
-- Optionally live-run `uv run python scripts/ap2_di_benchmark.py` if time
+- Optionally live-run `make ap2-bench` if time
   allows (~2s to run) — otherwise show the captured numbers slide.
 - Land the fix: build once in the lifespan, `Annotated[T, Depends(...)]`.
 
@@ -130,12 +130,14 @@ to say if it doesn't match**.
 ### AP1 — blocking event loop
 
 ```bash
-time (for i in 1 2 3; do curl -s -o /dev/null http://localhost:8000/demo/ap1/bad & done; wait)
+make ap1-bad
+# or: time (for i in 1 2 3; do curl -s -o /dev/null http://localhost:8000/demo/ap1/bad & done; wait)
 ```
 Expected: `~3.0s` total.
 
 ```bash
-time (for i in 1 2 3; do curl -s -o /dev/null http://localhost:8000/demo/ap1/good & done; wait)
+make ap1-good
+# or: time (for i in 1 2 3; do curl -s -o /dev/null http://localhost:8000/demo/ap1/good & done; wait)
 ```
 Expected: `~1.0s` total.
 
@@ -147,7 +149,7 @@ numbers (3.046s / 1.040s), which are the real ones from rehearsal.
 ### AP2 — DI lifecycle
 
 ```bash
-uv run python scripts/ap2_di_benchmark.py
+make ap2-bench     # or: uv run scripts/ap2_di_benchmark.py
 ```
 Expected: `bad` mean well above `good` mean (captured: 17.48ms vs 1.73ms).
 Takes ~2s to run — fine to do live if AP1 ran on time.
@@ -157,11 +159,14 @@ Takes ~2s to run — fine to do live if AP1 ran on time.
 ### AP3 — lazy loading
 
 ```bash
-curl -s "http://localhost:8000/demo/ap3/bad-crash?limit=3" | python3 -m json.tool
+make ap3-bad-crash
+# or: curl -s "http://localhost:8000/demo/ap3/bad-crash?limit=3" | python3 -m json.tool
 ```
 Expected: `"error_type": "MissingGreenlet"` in the response.
 
 ```bash
+make ap3-bad-n1 ap3-good
+# or:
 curl -s "http://localhost:8000/demo/ap3/bad-n1?limit=5" | python3 -m json.tool
 curl -s "http://localhost:8000/demo/ap3/good?limit=5" | python3 -m json.tool
 ```
@@ -181,6 +186,8 @@ projector). Show the slide's captured cProfile numbers instead. If you
 want a live moment anyway:
 
 ```bash
+make ap4     # both endpoints at limit=500
+# or:
 curl -s "http://localhost:8000/demo/ap4/bad?limit=200" | python3 -m json.tool
 curl -s "http://localhost:8000/demo/ap4/good?limit=200" | python3 -m json.tool
 ```
@@ -193,6 +200,8 @@ restart mid-demo, which is the single riskiest live moment in the talk.
 The safe default is the captured slide; this is the stretch goal.
 
 ```bash
+make ap5-bad && make ap5-load CSV=/tmp/live-bad DURATION=15s
+# or:
 POOL_MODE=bad docker compose up -d app && sleep 3
 uv run locust --headless -u 100 -r 100 -t 15s --host http://localhost:8000 \
   --csv /tmp/live-bad -f scripts/ap5_locustfile.py
@@ -200,6 +209,8 @@ uv run locust --headless -u 100 -r 100 -t 15s --host http://localhost:8000 \
 Expected: nonzero failure count, median latency in the seconds.
 
 ```bash
+make ap5-good && make ap5-load CSV=/tmp/live-good DURATION=15s
+# or:
 POOL_MODE=good docker compose up -d app && sleep 3
 uv run locust --headless -u 100 -r 100 -t 15s --host http://localhost:8000 \
   --csv /tmp/live-good -f scripts/ap5_locustfile.py
@@ -272,7 +283,7 @@ error messages) does shift.
   Every single number in the deck is already real, captured data; the
   live demo is bonus texture, not the argument.
 - **Wrong `POOL_MODE` mid-AP5**: if you notice `bad` requests aren't
-  failing, you're probably on `good` — `curl localhost:8000/demo/ap5/info`
+  failing, you're probably on `good` — `make ap5-info`
   to check, fix, retry once, then move to the slide if it's still wrong.
   Don't burn more than ~20 seconds on this.
 - **Running over time**: cut AP4's live curl (§3) first — it's the

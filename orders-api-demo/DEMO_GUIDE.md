@@ -14,9 +14,14 @@ Related docs: [`README.md`](README.md) (overview), [`CHECKLIST.md`](CHECKLIST.md
 
 ```bash
 cd orders-api-demo
-uv sync
-uv run python scripts/seed_data.py     # creates db/orders.db: 200 customers, 2000 orders, ~6000 items
+uv sync                                # make install
+uv run scripts/seed_data.py            # make seed  (creates db/orders.db: 200 customers, 2000 orders, ~6000 items)
 ```
+
+Every command in this guide has a [`Makefile`](Makefile) shortcut. Run `make` to list them all:
+`make apN` calls every endpoint of an anti-pattern and prints bad vs good side by side,
+`make apN-<endpoint>` calls one endpoint (for example `make ap1-bad`, `make ap3-bad-crash`), and
+the profiling scripts are `make ap1-debug`, `ap2-bench`, `ap3-echo`, `ap4-profile`, `ap5-load`.
 
 Seeding is idempotent ("Data already seeded, skipping"). Delete `db/orders.db` to reseed.
 
@@ -24,13 +29,13 @@ Seeding is idempotent ("Data already seeded, skipping"). Delete `db/orders.db` t
 
 ```bash
 # Terminal 1 — mock payment gateway (stands in for go-httpbin)
-uv run uvicorn mock_gateway.main:app --port 8080
+uv run uvicorn mock_gateway.main:app --port 8080    # make gateway
 
 # Terminal 2 — the Orders API
-uv run uvicorn app.main:app --port 8000
+uv run uvicorn app.main:app --port 8000             # make run  (POOL_MODE=bad for AP5)
 ```
 
-Sanity check:
+Sanity check (`make health`):
 
 ```bash
 curl localhost:8000/health                  # {"status":"ok"}
@@ -67,6 +72,8 @@ curl -X POST localhost:8000/orders -H 'content-type: application/json' \
   -d "{\"customer_id\":\"$CUSTOMER\",\"items\":[{\"sku\":\"SKU-0001AB\",\"quantity\":2,\"unit_price\":9.5}]}"
 ```
 
+Shortcut: `make baseline`.
+
 **Say:** "Nothing here is slow. Now I'll show five ways teams accidentally make
 this exact service slow — each one has a bad and a good endpoint on the same
 running process."
@@ -93,6 +100,9 @@ time (for i in 1 2 3; do curl -s -o /dev/null localhost:8000/demo/ap1/good & don
 time (for i in 1 2 3; do curl -s -o /dev/null localhost:8000/demo/ap1/bridge & done; wait)
 ```
 
+Or `make ap1` for all three at once (it also times a `/health` call made while they are in flight),
+or one at a time with `make ap1-bad`, `make ap1-good`, `make ap1-bridge`.
+
 **Expected:** bad ≈ **3.0s** (requests serialised), good ≈ **1.0s**, bridge ≈ **1.0s**.
 
 ### Make it visible
@@ -100,11 +110,11 @@ time (for i in 1 2 3; do curl -s -o /dev/null localhost:8000/demo/ap1/bridge & d
 - **Health check during the block** (most dramatic): in one terminal fire `curl localhost:8000/demo/ap1/bad`, and immediately in another run `curl localhost:8000/health`. The trivial health check hangs until the bad call finishes. Repeat with `/good` — health answers instantly.
 - **asyncio debug mode** (no app needed, only the gateway):
   ```bash
-  PYTHONASYNCIODEBUG=1 uv run python scripts/ap1_asyncio_debug.py
+  make ap1-debug        # or: uv run scripts/ap1_asyncio_debug.py
   ```
-  Prints `Executing <Task …> took 1.0xx seconds` for the BAD call and nothing for the GOOD one.
+  Prints `Executing <Task name='bad_blocking_call' …> took 1.0xx seconds` under the BAD header and nothing for the GOOD one.
 - **py-spy flame graph** (Docker only — the script uses `docker compose exec`):
-  `./scripts/ap1_pyspy_flamegraph.sh bad flamegraph-bad.svg`. Pre-captured graphs are in
+  `./scripts/ap1_pyspy_flamegraph.sh bad flamegraph-bad.svg` (or `make ap1-flamegraph MODE=bad`). Pre-captured graphs are in
   [`benchmarks/ap1-blocking/`](benchmarks/ap1-blocking/) and `talk/assets/` — open the SVGs instead if not on Docker.
 
 ### Talking points
@@ -132,8 +142,10 @@ lifespan, not inside a `Depends` that runs on every request.
 curl localhost:8000/demo/ap2/bad     # {"mode":"bad-new-engine-and-client-per-request","elapsed_seconds":…}
 curl localhost:8000/demo/ap2/good
 
-BASE_URL=http://localhost:8000 uv run python scripts/ap2_di_benchmark.py   # 50 requests each, mean/p50/p95
+uv run scripts/ap2_di_benchmark.py   # 50 requests each, mean/p50/p95
 ```
+
+Make shortcuts: `make ap2` (both endpoints, 20 requests each), `make ap2-bad`, `make ap2-good`, `make ap2-bench`.
 
 **Expected (SQLite, local):** bad ≈ 5–6 ms vs good ≈ 1.3 ms mean (~4x).
 **Expected (Postgres/Docker):** ~10x (17.5 ms vs 1.7 ms, see [`benchmarks/ap2-di/`](benchmarks/ap2-di/)) —
@@ -166,17 +178,20 @@ curl "localhost:8000/demo/ap3/bad-n1?limit=5"
 curl "localhost:8000/demo/ap3/good?limit=5"           # same item_counts as bad-n1
 ```
 
+Make shortcuts: `make ap3` (all three), `make ap3-bad-crash`, `make ap3-bad-n1`, `make ap3-good`.
+
 ### Make it visible — count the queries
 
 ```bash
-PYTHONPATH=. uv run python scripts/ap3_sqlalchemy_echo.py
+make ap3-echo        # or: uv run scripts/ap3_sqlalchemy_echo.py
 ```
 
 Prints every SQL statement (`echo=True`) and ends with
 `bad-n1 issued 6 queries, good issued 2 queries` for 5 orders (1 + N vs 1 + 1).
 Scale it: `?limit=100` → 101 queries vs 2.
 
-> The script uses `DATABASE_URL` if set, otherwise the app's configured database (SQLite by default).
+> The script uses `DATABASE_URL` if set, otherwise the app's configured database (SQLite by default,
+> or Postgres via `localhost` when `.env` points at Docker).
 
 ### Talking points
 - `bad-crash` is the *good* failure — it is loud. `bad-n1` is the dangerous one: correct output, silently slow, and each query is an `await` hop on the loop.
@@ -197,14 +212,18 @@ curl "localhost:8000/demo/ap4/bad?limit=500"
 curl "localhost:8000/demo/ap4/good?limit=500"
 ```
 
+Or `make ap4` (both, median of 5 runs), `make ap4-bad`, `make ap4-good`.
+
 Compare `elapsed_seconds` (only the transform is timed, not the DB fetch). Locally, bad is
 roughly **2–2.7x** slower (e.g. 5.8 ms vs 2.9 ms at 500 orders).
 
 ### Make it visible — function-call counts
 
 ```bash
-PYTHONPATH=. uv run python scripts/ap4_pydantic_cprofile.py
+make ap4-profile     # or: uv run scripts/ap4_pydantic_cprofile.py
 ```
+
+It rewrites `benchmarks/ap4-pydantic/cprofile-*.txt`; `git checkout benchmarks/ap4-pydantic` restores the capture.
 
 Shows cProfile output for both: ~290k function calls (bad) vs ~111k (good), ≈ **2.6x** more
 calls on SQLite data. Point at `bad_transform` vs `good_transform` cumulative time.
@@ -234,6 +253,10 @@ process start, so the demo **restarts the app** between runs instead of using a 
 
 ### Run (restart between the two runs!)
 
+With Docker, `make ap5-bad` and `make ap5-good` restart the app with that pool and fire a
+200-request burst; `make ap5-load` then runs locust (CSV prefix `my-run-<pool mode>`).
+Locally, restart `make run POOL_MODE=bad` / `POOL_MODE=good` yourself and use `make ap5` and `make ap5-load`.
+
 ```bash
 # --- BAD ---
 POOL_MODE=bad uv run uvicorn app.main:app --port 8000
@@ -254,7 +277,7 @@ them or point at another prefix like `/tmp/locust-bad` if you want to keep those
 **Expected (SQLite, 100 users, 15 s):** bad ≈ **40–45 % failures**, ~43 req/s; good **0 %**, ~97 req/s.
 **Captured (Postgres):** 2.1 % failures @ 47.8 req/s vs 0 % @ 179.3 req/s.
 
-Interactive alternative: `uv run locust -f scripts/ap5_locustfile.py --host http://localhost:8000`
+Interactive alternative: `make ap5-ui` (or `uv run locust -f scripts/ap5_locustfile.py --host http://localhost:8000`)
 and open <http://localhost:8089> for live charts — good for a projector.
 
 In the bad run the app log shows:
@@ -275,11 +298,10 @@ Every anti-pattern has a deterministic pytest asserting the same behaviour. The 
 the mock gateway itself if nothing is listening on `PAYMENT_GATEWAY_URL`:
 
 ```bash
-PAYMENT_GATEWAY_URL=http://localhost:8080 uv run pytest tests/ -v
+make test     # or: PAYMENT_GATEWAY_URL=http://localhost:8080 uv run pytest tests/ -v
 ```
 
-Expect 13 passed (~5 s). If your `.env` still has the Docker hostname, export the variable as
-above so it overrides it.
+Expect 13 passed (~5 s). With a Docker `.env`, `make test` also points `DATABASE_URL` at `localhost:5432`.
 
 ---
 
@@ -289,7 +311,7 @@ above so it overrides it.
 |---|---|---|
 | 0–2 | Baseline | Section 1; show `/docs` |
 | 2–6 | AP1 | 3× concurrent bad vs good; health-check-hangs trick; asyncio debug output |
-| 6–9 | AP2 | `ap2_di_benchmark.py`; mention Postgres is ~10x |
+| 6–9 | AP2 | `make ap2-bench`; mention Postgres is ~10x |
 | 9–13 | AP3 | Show the 500, then query counts script |
 | 13–16 | AP4 | `curl` both, then cProfile call counts |
 | 16–19 | AP5 | Restart in `bad`, locust, restart in `good`, locust; show timeout traceback |
@@ -306,11 +328,11 @@ above so it overrides it.
 
 ```bash
 cp .env.example .env          # DATABASE_URL=…@db:5432, PAYMENT_GATEWAY_URL=http://payment-gateway:8080
-docker compose up -d
-docker compose exec app uv run python scripts/seed_data.py
-POOL_MODE=bad docker compose up -d app    # AP5: recreate the app with a different pool mode
+docker compose up -d                       # make up
+uv run scripts/seed_data.py                # make seed
+POOL_MODE=bad docker compose up -d app     # make ap5-bad: recreate the app with a different pool mode
 ```
 
 Use this mode for AP2's ~10x gap, the py-spy flame graphs (`scripts/ap1_pyspy_flamegraph.sh`), and
-the Postgres AP5 numbers. The scripts under `scripts/` use `DATABASE_URL` if set, otherwise the app's configured database; from the host
-use `DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/orders"`.
+the Postgres AP5 numbers. The scripts under `scripts/` use `DATABASE_URL` if set, otherwise the app's configured database.
+On the host they swap the Docker hostnames (`db`, `payment-gateway`) for `localhost`, so no override is needed.
